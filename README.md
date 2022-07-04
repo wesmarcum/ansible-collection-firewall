@@ -1,5 +1,8 @@
 Ansible Collection - Firewall
 =============================
+[![Galaxy Collection][badge-galaxy]][link-galaxy]
+[![MIT licensed][badge-license]][link-license]
+[![CI][badge-gh-actions]][link-gh-actions]
 
 This collection of roles builds a dedicated open source firewall based on [FreeBSD](https://www.freebsd.org/).  Functionality similar to open source projects PFSense and OPNSense is provided, while maintaining a minimal management layer.
 
@@ -192,3 +195,10 @@ Changelog
 ---------
 
 1.0.0: Initial release.
+
+[badge-license]: https://img.shields.io/badge/license-MIT-green?
+[link-license]: https://github.com/wesmarcum/ansible-collection-firewall/blob/main/LICENSE
+[badge-gh-actions]: https://github.com/wesmarcum/ansible-collection-firewall/workflows/CI/badge.svg?event=push
+[link-gh-actions]: https://github.com/wesmarcum/ansible-collection-firewall/actions?query=workflow%3ACI
+[badge-galaxy]: https://img.shields.io/badge/collection-firewall-blue
+[link-galaxy]: https://galaxy.ansible.com/wesmarcum/firewall
