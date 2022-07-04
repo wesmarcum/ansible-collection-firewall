@@ -1,0 +1,41 @@
+---
+# This workflow requires a GALAXY_API_KEY secret present in the GitHub
+# repository or organization.
+#
+# Ref: https://github.com/marketplace/actions/publish-ansible-role-to-galaxy
+#
+
+name: Release
+'on':
+  push:
+    tags:
+      - '*'
+
+defaults:
+  run:
+    working-directory: ansible_collections/wesmarcum/firewall
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    env:
+      ANSIBLE_GALAXY_TOKEN: ${{ secrets.GALAXY_API_KEY }}
+      ANSIBLE_FORCE_COLOR: 1
+
+    steps:
+      - name: Check out the codebase.
+        uses: actions/checkout@v2
+        with:
+          path: ansible_collections/wesmarcum/firewall
+
+      - name: Set up Python 3.
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install Ansible.
+        run: pip3 install ansible-core
+
+      - name: Release to Ansible Galaxy.
+        run: ansible-playbook -i 'localhost,' galaxy-deploy.yml -e "github_tag=${{ github.ref }}"
