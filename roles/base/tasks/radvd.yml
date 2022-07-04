@@ -1,0 +1,51 @@
+---
+- name: Install radvd
+  ansible.builtin.package:
+    name: radvd
+    state: present
+  become: true
+
+- name: Create radvd group
+  ansible.builtin.group:
+    name: radvd
+    gid: "{{ firewall_radvd_gid }}"
+    system: yes
+    state: present
+  become: true
+
+- name: Create radvd user
+  ansible.builtin.user:
+    name: radvd
+    uid: "{{ firewall_radvd_uid }}"
+    create_home: no
+    home: /nonexistent
+    group: radvd
+    system: yes
+    shell: /usr/sbin/nologin
+    state: present
+  become: true
+
+- name: Template radvd.conf
+  ansible.builtin.template:
+    src: "usr/local/etc/radvd.conf.j2"
+    dest: "/usr/local/etc/radvd.conf"
+    owner: root
+    group: wheel
+    mode: '0644'
+  become: true
+  notify: restart radvd
+
+- name: Template the radvd service file
+  ansible.builtin.template:
+    src: "etc/rc.conf.d/radvd.j2"
+    dest: "/etc/rc.conf.d/radvd"
+    owner: root
+    group: wheel
+    mode: '0640'
+  become: true
+
+- name: Start radvd service
+  ansible.builtin.service:
+    name: radvd
+    state: started
+  become: true

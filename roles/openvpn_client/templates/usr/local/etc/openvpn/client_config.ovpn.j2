@@ -1,0 +1,116 @@
+# managed by ansible
+# generated for {{ ansible_fqdn }}
+
+# Daemonize the process (background)
+daemon openvpn_{{ item.name }}
+
+# Run in client mode (pull, tls-client)
+client
+
+# Use a layer 3 interface and specify the interface name
+dev-type tun
+dev {{ item.interface | default("tun100") }}
+
+# Do not bind to local address and port. The IP stack will allocate a dynamic port for returning packets.
+nobind
+
+# Specify remote server
+{% for remote in item.remotes %}
+remote {{ remote.host }} {{ remote.port | default(1194) }} {{ remote.protocol | default("udp") }}
+{% endfor %}
+
+{% if item.remote_random | default(false) | bool %}
+# Randomize server on startup
+remote-random
+
+{% endif %}
+# Credentials for authentication
+auth-user-pass /usr/local/etc/openvpn/{{ item.name }}/up
+
+# Don't cache credentials in memory
+auth-nocache
+
+# tls auth key for the server
+tls-auth /usr/local/etc/openvpn/{{ item.name }}/tls-auth 1
+
+# Directory for trusted server certs
+# capath /usr/local/etc/openvpn/{{ item.name }}/ca
+
+# Server ca
+ca /usr/local/etc/openvpn/{{ item.name }}/ca.crt
+
+# Set output verbosity
+verb {{ firewall_openvpn_client_verbosity }}
+
+# Write the main process id here
+writepid /var/run/openvpn_{{ item.name }}.pid
+
+# Write stats every 300 seconds
+status /var/log/openvpn_{{ item.name }} 300
+status-version 2
+
+{% if firewall_openvpn_client_drop_priv | bool %}
+# Drop privleges
+user openvpn
+group openvpn
+
+{% endif %}
+{% if firewall_openvpn_client_chroot | bool %}
+# Chroot the process after init
+chroot /usr/local/etc/openvpn/{{ item.name }}
+
+{% endif %}
+# Policy-level control over OpenVPN's usage of external programs and scripts.  Range of values: 0-3.
+script-security {{ firewall_openvpn_client_script_security }}
+
+# ping / ping-restart
+keepalive {{ firewall_openvpn_client_keepalive_ping }} {{ firewall_openvpn_client_keepalive_ping_restart }}
+
+# Wait this number of seconds between connection attempts
+connect-retry {{ firewall_openvpn_client_retry }}
+
+# Run the --ping-exit / --ping-restart timer only if we have a remote address
+ping-timer-rem
+
+# Don't close/reopen tun/tap device
+persist-tun
+
+# Don't re-read key files on SIGUSR1 or ping restart
+persist-key
+
+# Default protocol
+proto {{ item.protocol | default("udp") }}
+
+# Auth control and data channel packets
+auth {{ item.auth | default("SHA512") }}
+
+# Allowed ciphers for negotiation
+data-ciphers {{ item.data_ciphers | default("CHACHA20-POLY1305:AES-256-GCM:AES-128-GCM") }}
+
+# Cipher for fallback if negotiation fails
+data-ciphers-fallback {{ item.data_ciphers_fallback | default("AES-256-GCM") }}
+
+# Decompress downlink packets, but never send compressed
+allow-compression asym
+
+# If hostname resolution fails, retry this number of seconds before failing
+resolv-retry {{ firewall_openvpn_client_resolv_retry }}
+
+{% if item.route_nopull | default(true) | bool %}
+# Don't add routes to the routing table
+route-nopull
+{% endif %}
+
+# Optimize I/O writes
+fast-io
+
+# Require that peer certificate was signed with an explicit key usage and extended key usage based on RFC3280 TLS rules
+remote-cert-tls server
+
+# Set tunnel MTU
+tun-mtu {{ item.mtu | default(1500) }}
+tun-mtu-extra {{ item.mtu_extra | default(32) }}
+mssfix {{ item.mssfix | default(1450) }}
+
+# Renegotiate data channel key after at most max seconds
+reneg-sec {{ firewall_openvpn_client_reneg }}

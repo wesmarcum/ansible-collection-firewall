@@ -1,0 +1,9 @@
+# managed by ansible
+# generated for {{ ansible_fqdn }}
+
+{% if firewall_unbound_enable_ipv6 == 'yes' %}
+nameserver ::1
+{% endif %}
+{% if firewall_unbound_enable_ipv4 == 'yes' %}
+nameserver 127.0.0.1
+{% endif %}

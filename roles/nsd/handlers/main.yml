@@ -1,0 +1,23 @@
+---
+- name: restart nsd
+  ansible.builtin.service:
+    name: nsd
+    state: restarted
+  become: true
+
+- name: reload nsd
+  ansible.builtin.command:
+    cmd: "/usr/local/sbin/nsd-control reload"
+  become: true
+
+- name: restart syslogd
+  ansible.builtin.service:
+    name: syslogd
+    state: restarted
+  become: true
+
+- name: restart newsyslog
+  ansible.builtin.service:
+    name: newsyslog
+    state: restarted
+  become: true

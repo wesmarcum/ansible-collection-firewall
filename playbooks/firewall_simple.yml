@@ -1,0 +1,11 @@
+---
+- name: Set up firewall
+  hosts: firewall
+  become: false
+  vars_files:
+    - vars/firewall_simple.yml
+
+  roles:
+    - wesmarcum.firewall.base
+    - wesmarcum.firewall.unbound
+    - wesmarcum.firewall.kea

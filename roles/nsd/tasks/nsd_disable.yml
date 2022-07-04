@@ -1,0 +1,51 @@
+---
+- name: Stop nsd service
+  ansible.builtin.service:
+    name: nsd
+    state: stopped
+  become: true
+
+- name: Uninstall nsd
+  ansible.builtin.package:
+    name: nsd
+    state: absent
+  become: true
+
+- name: Remove nsd directory
+  ansible.builtin.file:
+    path: "{{ firewall_nsd_path }}"
+    state: absent
+  become: true
+
+- name: Remove nsd log file
+  ansible.builtin.file:
+    path: "/var/log/nsd.log"
+    state: absent
+  become: true
+
+- name: Remove syslog configuration for nsd
+  ansible.builtin.file:
+    path: "/usr/local/etc/syslog.d/nsd.conf"
+    state: absent
+  become: true
+
+- name: Modify /etc/syslog.conf
+  ansible.builtin.lineinfile:
+    path: "/etc/syslog.conf"
+    regexp: '^\!-nsd'
+    state: absent
+  become: true
+  notify: restart syslogd
+
+- name: Remove newsyslog configuration for nsd
+  ansible.builtin.file:
+    path: "/usr/local/etc/newsyslog.conf.d/nsd.conf"
+    state: absent
+  become: true
+  notify: restart newsyslog
+
+- name: Remove nsd service file
+  ansible.builtin.file:
+    path: "/etc/rc.conf.d/nsd"
+    state: absent
+  become: true

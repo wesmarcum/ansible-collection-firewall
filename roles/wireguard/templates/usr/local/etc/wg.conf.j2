@@ -1,0 +1,42 @@
+# managed by ansible
+# generated for {{ ansible_fqdn }}
+
+[Interface]
+PrivateKey = {{ item.private_key }}
+Address = {{ item.address }}
+{% if item.listen_port is defined %}
+ListenPort = {{ item.listen_port }}
+{% endif %}
+{% if item.mtu is defined %}
+MTU = {{ item.mtu }}
+{% endif %}
+{% if item.dns is defined %}
+DNS = {{ item.dns }}
+{% endif %}
+{% if item.table is defined %}
+Table = {{ item.table }}
+{% endif %}
+{% if item.fwmark is defined %}
+FwMark = {{ item.fwmark }}
+{% endif %}
+
+{% for peer in item.peers %}
+{%   if peer.description is defined %}
+# {{ peer.description }}
+{%   endif %}
+[Peer]
+PublicKey = {{ peer.public_key }}
+{%   if peer.preshared_key is defined %}
+PresharedKey = {{ peer.preshared_key }}
+{%   endif %}
+AllowedIPs = {{ peer.allowed_ips }}
+{%   if peer.endpoint is defined %}
+Endpoint = {{ peer.endpoint }}
+{%   endif %}
+{%   if peer.persistent_keepalive is defined %}
+PersistentKeepalive = {{ peer.persistent_keepalive }}
+{%   endif %}
+{%   if not loop.last %}
+
+{%   endif %}
+{% endfor %}

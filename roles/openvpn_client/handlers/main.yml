@@ -1,0 +1,9 @@
+---
+- name: restart openvpn clients
+  ansible.builtin.service:
+    name: "openvpn_{{ item.name }}"
+    state: restarted
+  become: true
+  loop: "{{ firewall_openvpn_client_conf }}"
+  when: firewall_openvpn_client_enable | bool
+  no_log: yes

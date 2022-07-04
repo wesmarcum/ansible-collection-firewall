@@ -1,0 +1,273 @@
+# managed by ansible
+# generated for {{ ansible_fqdn }}
+
+##########################
+# NSD Configuration
+##########################
+
+server:
+    ###
+    ### General
+    ###
+
+    # After binding socket, drop user privileges.
+    # can be a username, id or id.gid.
+    username: {{ firewall_nsd_username | string }}
+
+    # Run NSD in a chroot-jail.
+    # make sure to have pidfile and database reachable from there.
+    # by default, no chroot-jail is used.
+    chroot: "{{ firewall_nsd_path }}"
+
+    # The directory for zonefile: files.  The daemon chdirs here.
+    zonesdir: "{{ firewall_nsd_path }}"
+
+    # the list of dynamically added zones.
+    zonelistfile: "{{ firewall_nsd_path }}/db/zone.list"
+
+    # the database to use
+    # if set to "" then no disk-database is used, less memory usage.
+    database: "{{ firewall_nsd_path }}/db/nsd.db"
+
+    # Number of NSD servers to fork.  Put the number of CPUs to use here.
+    server-count: {{ firewall_nsd_server_count | int }}
+
+    # check mtime of all zone files on start and sighup
+    zonefiles-check: {{ firewall_nsd_zonefiles_check | string }}
+
+    # File to store pid for nsd in.
+    pidfile: "{{ firewall_nsd_path }}/nsd.pid"
+
+    # The file where secondary zone refresh and expire timeouts are kept.
+    # If you delete this file, all secondary zones are forced to be
+    # 'refreshing' (as if nsd got a notify).  Set to "" to disable.
+    xfrdfile: "{{ firewall_nsd_path }}/db/xfrd.state"
+
+    # The directory where zone transfers are stored, in a subdir of it.
+    xfrdir: "{{ firewall_nsd_path }}/tmp"
+
+    # enable debug mode, does not fork daemon process into the background.
+    debug-mode: {{ firewall_nsd_debug_mode | string }}
+
+    ###
+    ### Network
+    ###
+
+    # port to answer queries on. default is 53.
+    port: {{ firewall_nsd_port | int }}
+
+    # Specify specific interfaces to bind (default are the wildcard
+    # interfaces 0.0.0.0 and ::0).
+    # For servers with multiple IP addresses, list them one by one,
+    # or the source address of replies could be wrong.
+    # Use ip-transparent to be able to list addresses that turn on later.
+    {% if firewall_nsd_interfaces | length > 0 %}
+    {%   for int in firewall_nsd_interfaces %}
+    ip-address: {{ int }}
+    {%   endfor %}
+    {% endif %}
+
+    # listen on IPv4 connections
+    do-ip4: {{ firewall_nsd_enable_ipv4 | string }}
+
+    # listen on IPv6 connections
+    do-ip6: {{ firewall_nsd_enable_ipv6 | string }}
+
+    # Allow binding to non local addresses. Default no.
+    ip-transparent: {{ firewall_nsd_ip_transparent | string }}
+
+    # Allow binding to addresses that are down. Default no.
+    ip-freebind: {{ firewall_nsd_ip_freebind | string }}
+
+    {% if firewall_nsd_tls_enable %}
+    # Service clients over TLS (on the TCP sockets), with plain DNS inside
+    # the TLS stream. Give the certificate to use and private key.
+    # Default is "" (disabled). Requires restart to take effect.
+    tls-service-key: "{{ firewall_nsd_tls_service_key }}"
+    tls-service-pem: "{{ firewall_nsd_tls_service_pem }}"
+    {%  if firewall_nsd_tls_service_ocsp | length > 0 %}
+    tls-service-ocsp: "{{ firewall_nsd_tls_service_ocsp }}"
+    {%  endif %}
+    tls-port: {{ firewall_nsd_tls_port | int }}
+    {%  if firewall_nsd_tls_interfaces | length > 0 %}
+    
+    # DoT Interfaces
+    {%      for int in firewall_nsd_tls_interfaces %}
+    {# check for valid ipv4 address #}
+    {%          if firewall_interfaces[int].ipv4_address | default(omit) | ansible.utils.ipaddr %}
+    interface: {{ firewall_interfaces[int].ipv4_address | ansible.utils.ipaddr('address') }}@{{ firewall_nsd_tls_port }}
+    {%          endif %}
+    {# check for valid ipv6 address #}
+    {%          if firewall_interfaces[int].ipv6_address | default(omit) | ansible.utils.ipaddr %}
+    interface: {{ firewall_interfaces[int].ipv6_address | ansible.utils.ipaddr('address') }}@{{ firewall_nsd_tls_port }}
+    {%          endif %}
+    {%      endfor %}
+    {%  endif %}
+    {% endif %}
+    
+    ###
+    ### Logging
+    ###
+
+    # Verbosity level.
+    verbosity: {{ firewall_nsd_logging_verbosity | int }}
+
+    # log messages to file. Default to stderr and syslog (with
+    # facility LOG_DAEMON).  stderr disappears when daemon goes to bg.
+    logfile: "{{ firewall_nsd_logfile }}"
+
+    # log only to syslog.
+    log-only-syslog: {{ firewall_nsd_log_only_syslog | string }}
+
+    # log timestamp in ascii (y-m-d h:m:s.msec), yes is default.
+    log-time-ascii: {{ firewall_nsd_log_time_ascii | string }}
+
+    ###
+    ### Security
+    ###
+
+    # refuse queries of type ANY.  For stopping floods.
+    refuse-any: {{ firewall_nsd_refuse_any | string }}
+
+    # don't answer VERSION.BIND and VERSION.SERVER CHAOS class queries
+    hide-version: {{ firewall_nsd_hide_version | string }}
+
+    # don't answer HOSTNAME.BIND and ID.SERVER CHAOS class queries
+    hide-identity: {{ firewall_nsd_hide_identity | string }}
+
+    # Drop UPDATE queries
+    drop-updates: {{ firewall_nsd_drop_updates | string }}
+
+    # version string the server responds with for chaos queries.
+    # default is 'NSD x.y.z' with the server's version number.
+    version: "{{ firewall_nsd_version }}"
+
+    # identify the server (CH TXT ID.SERVER entry).
+    identity: "{{ firewall_nsd_identity }}"
+
+    # NSID identity (hex string, or "ascii_somestring"). default disabled.
+    nsid: "{{ firewall_nsd_nsid }}"
+
+    # minimal-responses only emits extra data for referrals.
+    minimal-responses: {{ firewall_nsd_minimal_responses | string }}
+
+    # Do not return additional information if the apex zone of the
+    # additional information is configured but does not match the apex zone
+    # of the initial query.
+    confine-to-zone: {{ firewall_nsd_confine_to_zone | string }}
+
+    ###
+    ### Performance
+    ###
+
+    # Use SO_REUSEPORT socket option for performance. Default no.
+    reuseport: {{ firewall_nsd_reuseport | string }}
+
+    # override maximum socket send buffer size.  Default of 0 results in
+    # send buffer size being set to 1048576 (bytes).
+    send-buffer-size: {{ firewall_nsd_send_buffer | int }}
+
+    # override maximum socket receive buffer size. Default of 0 results in
+    # receive buffer size being set to 1048576 (bytes).
+    receive-buffer-size: {{ firewall_nsd_receive_buffer | int }}
+
+    # Maximum number of concurrent TCP connections per server.
+    tcp-count: {{ firewall_nsd_tcp_count | int }}
+
+    # Accept (and immediately close) TCP connections after maximum number
+    # of connections is reached to prevent kernel connection queue from
+    # growing.
+    tcp-reject-overflow: {{ firewall_nsd_tcp_reject_overflow | string }}
+
+    # Maximum number of queries served on a single TCP connection.
+    # By default 0, which means no maximum.
+    tcp-query-count: {{ firewall_nsd_tcp_query_count | int }}
+
+    # Override the default (120 seconds) TCP timeout.
+    tcp-timeout: {{ firewall_nsd_tcp_timeout | int }}
+
+    # Maximum segment size (MSS) of TCP socket on which the server
+    # responds to queries. Default is 0, system default MSS.
+    tcp-mss: {{ firewall_nsd_tcp_mss | int }}
+
+    # Maximum segment size (MSS) of TCP socket for outgoing AXFR request.
+    # Default is 0, system default MSS.
+    outgoing-tcp-mss: {{ firewall_nsd_outgoing_tcp_mss | int }}
+
+    # Preferred EDNS buffer size for IPv4.
+    ipv4-edns-size: {{ firewall_nsd_ipv4_edns_size | int }}
+
+    # Preferred EDNS buffer size for IPv6.
+    ipv6-edns-size: {{ firewall_nsd_ipv6_edns_size | int }}
+
+    # Number of seconds between reloads triggered by xfrd.
+    xfrd-reload-timeout: {{ firewall_nsd_xfrd_reload_timeout | int }}
+
+    # Response Rate Limiting, size of the hashtable. Default 1000000.
+    rrl-size: {{ firewall_nsd_rrl_size | int }}
+
+    # Response Rate Limiting, maximum QPS allowed (from one query source).
+    # If set to 0, ratelimiting is disabled. Also set
+    # rrl-whitelist-ratelimit to 0 to disable ratelimit processing.
+    # Default is on.
+    rrl-ratelimit: {{ firewall_nsd_rrl_ratelimit | int }}
+
+    # Response Rate Limiting, number of packets to discard before
+    # sending a SLIP response (a truncated one, allowing an honest
+    # resolver to retry with TCP). Default is 2 (one half of the
+    # queries will receive a SLIP response, 0 disables SLIP (all
+    # packets are discarded), 1 means every request will get a
+    # SLIP response.  When the ratelimit is hit the traffic is
+    # divided by the rrl-slip value.
+    rrl-slip: {{ firewall_nsd_rrl_slip | int }}
+
+    # Response Rate Limiting, IPv4 prefix length. Addresses are
+    # grouped by netblock.
+    rrl-ipv4-prefix-length: {{ firewall_nsd_rrl_ipv4_prefix_length | int }}
+
+    # Response Rate Limiting, IPv6 prefix length. Addresses are
+    # grouped by netblock.
+    rrl-ipv6-prefix-length: {{ firewall_nsd_rrl_ipv6_prefix_length | int }}
+
+    # Response Rate Limiting, maximum QPS allowed (from one query source)
+    # for whitelisted types. Default is on.
+    rrl-whitelist-ratelimit: {{ firewall_nsd_rrl_whitelist_ratelimit | int }}
+
+    # round robin rotation of records in the answer.
+    round-robin: {{ firewall_nsd_round_robin | string }}
+
+    # write changed zonefiles to disk, every N seconds.
+    # default is 0(disabled) or 3600(if database is "").
+    zonefiles-write: {{ firewall_nsd_zonefiles_write | int }}
+
+    ###
+    ### Statistics
+    ###
+
+    # statistics are produced every number of seconds. Prints to log.
+    # Default is 0, meaning no statistics are produced.
+    statistics: {{ firewall_nsd_statistics_interval | int }}
+
+    ###
+    ### Remote Control
+    ###
+
+    include: "{{ firewall_nsd_path }}/remotecontrol.conf"
+
+    ###
+    ### Secret Keys
+    ###
+
+    include: "{{ firewall_nsd_path }}/keys.conf"
+
+    ###
+    ### Patterns
+    ###
+
+    include: "{{ firewall_nsd_path }}/patterns.conf"
+
+    ###
+    ### Zones
+    ###
+
+    include: "{{ firewall_nsd_path }}/zones.conf"

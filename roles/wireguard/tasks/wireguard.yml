@@ -1,0 +1,45 @@
+---
+- name: Install wireguard packages (go)
+  ansible.builtin.package:
+    name:
+      - wireguard-go
+      - wireguard-tools
+    state: present
+  become: true
+  when: not firewall_wireguard_use_kmod | bool
+
+- name: Install wireguard packages (kmod)
+  ansible.builtin.package:
+    name:
+      - wireguard-kmod
+      - wireguard-tools
+    state: present
+  become: true
+  when: firewall_wireguard_use_kmod | bool
+
+- name: Template wireguard configuration files
+  ansible.builtin.template:
+    src: "usr/local/etc/wg.conf.j2"
+    dest: "{{ firewall_wireguard_path }}/{{ item.name }}.conf"
+    owner: root
+    group: wheel
+    mode: '0600'
+  become: true
+  loop: "{{ firewall_wireguard_conf }}"
+  no_log: yes
+  notify: reload wireguard
+
+- name: Template wireguard service file
+  ansible.builtin.template:
+    src: "etc/rc.conf.d/wireguard.j2"
+    dest: "/etc/rc.conf.d/wireguard"
+    owner: root
+    group: wheel
+    mode: '0640'
+  become: true
+
+- name: Start wireguard service
+  ansible.builtin.service:
+    name: wireguard
+    state: started
+  become: true

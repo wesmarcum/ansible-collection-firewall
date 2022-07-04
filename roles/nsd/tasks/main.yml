@@ -1,0 +1,20 @@
+---
+# Install and configure nsd.
+- name: Enable NSD
+  ansible.builtin.import_tasks: "tasks/nsd.yml"
+  when: firewall_nsd_enable | bool
+  tags:
+    - dns
+    - nsd
+
+- name: Disable NSD
+  ansible.builtin.include_tasks:
+    file: "tasks/nsd_disable.yml"
+    apply:
+      tags:
+        - dns
+        - nsd
+  when: firewall_nsd_enable | bool is false
+  tags:
+    - dns
+    - nsd

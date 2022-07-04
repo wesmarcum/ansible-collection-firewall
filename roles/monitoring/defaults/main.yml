@@ -1,0 +1,96 @@
+---
+### Monitoring
+
+firewall_monitoring_packages:
+  - bmon
+  - bpytop
+  - iftop
+  - vnstat
+
+# Enable monitoring packages.
+firewall_monitoring_enable: true
+
+# Email options for periodic.
+firewall_monitoring_email_enable: false
+firewall_monitoring_email_mailto: ""
+firewall_monitoring_email_root_alias: ""
+firewall_monitoring_email_mailhub: ""
+firewall_monitoring_email_port: 25
+firewall_monitoring_email_rewritedomain: ""
+firewall_monitoring_email_hostname: ""
+firewall_monitoring_email_fromlineoverride: "NO"
+firewall_monitoring_email_usetls: "NO"
+firewall_monitoring_email_usetls_cert: "NO"
+firewall_monitoring_email_usestarttls: "NO"
+firewall_monitoring_email_username: ""
+firewall_monitoring_email_password: ""
+
+# Path for the ssmtp configuration.
+firewall_monitoring_ssmtp_path: "/usr/local/etc/ssmtp"
+
+# Enable vnstat interface monitoring.
+firewall_monitoring_vnstat_enable: false
+
+firewall_monitoring_vnstat_config: "/usr/local/etc/vnstat.conf"
+firewall_monitoring_vnstat_flags: "-d"
+
+# Default interface, leave blank for auto.
+firewall_monitoring_vnstat_default_int: ""
+
+firewall_monitoring_vnstat_db_path: "/usr/local/var/lib/vnstat"
+
+# How units are prefixed when traffic is shown.
+# 0 = IEC standard prefixes (KiB/MiB/GiB...)
+# 1 = old style binary prefixes (KB/MB/GB...)
+# 2 = SI decimal prefixes (kB/MB/GB...)
+firewall_monitoring_vnstat_unitmode: 0
+
+# Used rate unit (0 = bytes, 1 = bits).
+firewall_monitoring_vnstat_rateunit: 1
+
+# How units are prefixed when traffic rate is shown in bits.
+# 0 = IEC binary prefixes (Kibit/s...)
+# 1 = SI decimal prefixes (kbit/s...)
+firewall_monitoring_vnstat_rateunitmode: 0
+
+# Output style.
+# 0 = minimal & narrow, 1 = bar column visible
+# 2 = same as 1 except rate in summary
+# 3 = rate column visible
+firewall_monitoring_vnstat_outputstyle: 3
+firewall_monitoring_vnstat_estbarvisible: 1
+
+# User and group for vnstatd when not using root.
+firewall_monitoring_vnstat_user: "vnstat"
+firewall_monitoring_vnstat_group: "vnstat"
+
+# Enable auto detection of interface bandwidth.
+firewall_monitoring_vnstat_bwdetect: 1
+
+# Maximum bandwidth (Mbit) for all interfaces, 0 = disable feature.
+# (unless interface specific limit is given)
+firewall_monitoring_vnstat_maxbw: 1000
+
+# Data retention durations (-1 = unlimited, 0 = feature disabled).
+firewall_monitoring_vnstat_5minute_hours: 48
+firewall_monitoring_vnstat_hourly_days: 4
+firewall_monitoring_vnstat_daily_days: 62
+firewall_monitoring_vnstat_monthly_months: 25
+firewall_monitoring_vnstat_yearly_years: -1
+firewall_monitoring_vnstat_topdayentries: 20
+
+# How often (in seconds) interface data is updated.
+firewall_monitoring_vnstat_updateinterval: 20
+
+# How often (in seconds) interface status changes are checked.
+firewall_monitoring_vnstat_pollinterval: 5
+
+# How often (in minutes) data is saved to database.
+firewall_monitoring_vnstat_saveinterval: 5
+
+# Day of the month to rotate stats.
+firewall_monitoring_vnstat_monthrotate: 1
+
+# Enable / disable logging (0 = disabled, 1 = logfile, 2 = syslog).
+firewall_monitoring_vnstat_uselogging: 1
+firewall_monitoring_vnstat_logfile: "/var/log/vnstat.log"

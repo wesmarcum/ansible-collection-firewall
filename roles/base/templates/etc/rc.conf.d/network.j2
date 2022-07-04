@@ -1,0 +1,33 @@
+# managed by ansible
+# generated for {{ ansible_fqdn }}
+
+{% for int, data in firewall_interfaces.items() %}
+# {{ data.name | default(int) }}
+{# generate vlans #}
+{% if data.vlans is defined %}
+vlans_{{ int }}="{{ data.vlans | join(' ') }}"
+{% endif %}
+{# ipv4 configuration #}
+{%  if data.ipv4_address is defined %}
+{%      if data.ipv4_address | lower == 'dhcp' %}
+ifconfig_{{ int | replace('.', '_') }}="SYNCDHCP"
+{%      elif data.ipv4_address | ansible.utils.ipaddr('host/prefix') %}
+ifconfig_{{ int | replace('.', '_') }}="inet {{ data.ipv4_address | ansible.utils.ipaddr('address') }} netmask {{ data.ipv4_address | ansible.utils.ipaddr('netmask') }} mtu {{ data.mtu | default(1500) }}"
+{%      endif %}
+{%  endif %}
+{# ipv6 configuration #}
+{%  if data.ipv6_address is defined %}
+{%      if data.ipv6_address | lower == 'dhcp' %}
+ifconfig_{{ int | replace('.', '_') }}_ipv6="inet6 accept_rtadv"
+{%      elif data.ipv6_address | ansible.utils.ipaddr('host/prefix') %}
+ifconfig_{{ int | replace('.', '_') }}_ipv6="inet6 {{ data.ipv6_address | ansible.utils.ipaddr('address') }} prefixlen {{ data.ipv6_address | ansible.utils.ipaddr('prefix') }} mtu {{ data.mtu | default(1500) }}"
+{%      endif %}
+{%  endif %}
+{% if data.name is defined %}
+ifconfig_{{ int | replace('.', '_') }}_descr="{{ data.name }}"
+{% endif %}
+{% if data.state is defined and (data.state | lower == 'up' or data.state | lower == 'down') %}
+ifconfig_{{ int | replace('.', '_') }}="{{ data.state | lower }}"
+{% endif %}
+
+{% endfor %}

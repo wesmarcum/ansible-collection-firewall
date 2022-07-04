@@ -1,0 +1,198 @@
+---
+- name: Install nsd
+  ansible.builtin.package:
+    name: nsd
+    state: present
+  become: true
+
+- name: Set permissions on nsd directory
+  ansible.builtin.file:
+    path: "{{ firewall_nsd_path }}"
+    owner: nsd
+    group: wheel
+    mode: '0755'
+  become: true
+
+- name: Create subdirectories for nsd
+  ansible.builtin.file:
+    path: "{{ firewall_nsd_path }}/{{ item }}"
+    owner: nsd
+    group: wheel
+    mode: '0750'
+    state: directory
+  become: true
+  with_items:
+    - cert
+    - db
+    - tmp
+    - zones
+
+- name: Template nsd config
+  ansible.builtin.template:
+    src: "usr/local/etc/nsd/nsd.conf.j2"
+    dest: "{{ firewall_nsd_path }}/nsd.conf"
+    owner: nsd
+    group: wheel
+    mode: '0640'
+    lstrip_blocks: yes
+    backup: yes
+  become: true
+  notify: restart nsd
+
+- name: Template nsd remote control config
+  ansible.builtin.template:
+    src: "usr/local/etc/nsd/remotecontrol.conf.j2"
+    dest: "{{ firewall_nsd_path }}/remotecontrol.conf"
+    owner: nsd
+    group: wheel
+    mode: '0640'
+  become: true
+  notify: reload nsd
+
+- name: Check for nsd server key
+  ansible.builtin.stat:
+    path: "{{ firewall_nsd_path }}/nsd_server.key"
+  register: server_key
+
+- name: Check for nsd control key
+  ansible.builtin.stat:
+    path: "{{ firewall_nsd_path }}/nsd_control.key"
+  register: control_key
+
+- name: Determine if keys need to be generated
+  ansible.builtin.set_fact:
+    nsd_gen_keys: true
+  when: (not server_key.stat.exists) or (not control_key.stat.exists)
+
+- name: Generate nsd control/server keys
+  ansible.builtin.command:
+    cmd: "/usr/local/sbin/nsd-control-setup"
+  become: true
+  when: nsd_gen_keys | default(false) | bool
+  notify: restart nsd
+
+- name: Set permissions on control keys
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    owner: nsd
+    group: wheel
+    mode: "{{ item.mode }}"
+  become: true
+  with_items:
+    - { path: "{{ firewall_nsd_path }}/nsd_control.key", mode: '0600' }
+    - { path: "{{ firewall_nsd_path }}/nsd_control.pem", mode: '0640' }
+    - { path: "{{ firewall_nsd_path }}/nsd_server.key", mode: '0600' }
+    - { path: "{{ firewall_nsd_path }}/nsd_server.pem", mode: '0640' }
+
+- name: Template patterns config
+  ansible.builtin.template:
+    src: "usr/local/etc/nsd/patterns.conf.j2"
+    dest: "{{ firewall_nsd_path }}/patterns.conf"
+    owner: nsd
+    group: wheel
+    mode: '0640'
+  become: true
+  notify: reload nsd
+
+- name: Generate secret if not defined in vault
+  ansible.builtin.set_fact:
+    firewall_nsd_secret: "{{ lookup('password', 'nsd_secret length=32') | b64encode }}"
+  when: vault_firewall_nsd_secret is not defined
+
+- name: Template keys config
+  ansible.builtin.template:
+    src: "usr/local/etc/nsd/keys.conf.j2"
+    dest: "{{ firewall_nsd_path }}/keys.conf"
+    owner: nsd
+    group: wheel
+    mode: '0640'
+  become: true
+  notify: reload nsd
+
+- name: Copy zone files
+  ansible.builtin.copy:
+    src: "usr/local/etc/nsd/zones/{{ item.zonefile }}"
+    dest: "{{ firewall_nsd_path }}/zones/{{ item.zonefile }}"
+    owner: nsd
+    group: wheel
+    mode: '0640'
+  become: true
+  loop: "{{ firewall_nsd_zones }}"
+  when: firewall_nsd_zones | length > 0
+  notify: reload nsd
+
+- name: Template zones config
+  ansible.builtin.template:
+    src: "usr/local/etc/nsd/zones.conf.j2"
+    dest: "{{ firewall_nsd_path }}/zones.conf"
+    owner: nsd
+    group: wheel
+    mode: '0640'
+  become: true
+  when: firewall_nsd_zones | length > 0
+  notify: reload nsd
+
+- name: Create nsd log file
+  ansible.builtin.file:
+    path: "/var/log/nsd.log"
+    state: touch
+    owner: nsd
+    group: wheel
+    mode: '0640'
+    modification_time: preserve
+    access_time: preserve
+  become: true
+  notify:
+    - reload nsd
+    - restart syslogd
+
+- name: Set syslog for nsd
+  ansible.builtin.blockinfile:
+    path: "/usr/local/etc/syslog.d/nsd.conf"
+    owner: root
+    group: wheel
+    mode: '0640'
+    create: yes
+    block: |
+      !nsd
+      *.*             /var/log/nsd.log
+  become: true
+  notify: restart syslogd
+
+- name: Modify /etc/syslog.conf
+  ansible.builtin.lineinfile:
+    path: "/etc/syslog.conf"
+    line: "!-nsd"
+    insertbefore: '^\*\.=debug'
+    regexp: '^\!-nsd'
+  become: true
+  notify: restart syslogd
+
+- name: Rotate logs for nsd
+  ansible.builtin.blockinfile:
+    path: "/usr/local/etc/newsyslog.conf.d/nsd.conf"
+    owner: root
+    group: wheel
+    mode: '0640'
+    create: yes
+    block: |
+      # configuration file for newsyslog (included by /etc/newsyslog.conf)
+      # logfilename        [owner:group]    mode    count    size    when    flags    [/pid_file]    [sig_num]
+      /var/log/nsd.log    nsd:wheel    640    7    *    @T00    JB
+  become: true
+  notify: restart newsyslog
+
+- name: Template nsd service file
+  ansible.builtin.template:
+    src: "etc/rc.conf.d/nsd.j2"
+    dest: "/etc/rc.conf.d/nsd"
+    owner: root
+    group: wheel
+    mode: '0640'
+  become: true
+
+- name: Start nsd
+  ansible.builtin.service:
+    name: nsd
+    state: started
+  become: true

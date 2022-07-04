@@ -1,0 +1,28 @@
+# managed by ansible
+# generated for {{ ansible_fqdn }}
+
+# loopback interfaces
+access-control: 127.0.0.1/32 allow_snoop
+access-control: ::1/128 allow_snoop
+
+# internal interfaces
+{% for int, data in firewall_interfaces.items() %}
+{%  if not data.external | default(false) | bool %}
+# {{ data.name | default(int) }}
+{%      if data.ipv4_address is defined and data.ipv4_address | ansible.utils.ipaddr %}
+access-control: {{ data.ipv4_address | ansible.utils.ipaddr('network/prefix') }} allow
+{%      endif %}
+{%      if data.ipv6_address is defined and data.ipv6_address | ansible.utils.ipaddr %}
+access-control: {{ data.ipv6_address | ansible.utils.ipaddr('network/prefix') }} allow
+{%      endif %}
+{%  endif %}
+{% endfor %}
+
+# additional networks
+{% if firewall_unbound_acl_networks | length > 0 %}
+{%  for net in firewall_unbound_acl_networks %}
+{%      if net | ansible.utils.ipaddr %}
+access-control: {{ net | ansible.utils.ipaddr('network/prefix') }} allow
+{%      endif %}
+{%  endfor %}
+{% endif %}

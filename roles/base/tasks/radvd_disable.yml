@@ -1,0 +1,44 @@
+---
+- name: Stop radvd service
+  ansible.builtin.service:
+    name: radvd
+    state: stopped
+  become: true
+
+- name: Uninstall radvd
+  ansible.builtin.package:
+    name: radvd
+    state: absent
+  become: true
+
+- name: Delete radvd group
+  ansible.builtin.group:
+    name: radvd
+    gid: "{{ firewall_radvd_gid }}"
+    system: yes
+    state: absent
+  become: true
+
+- name: Delete radvd user
+  ansible.builtin.user:
+    name: radvd
+    uid: "{{ firewall_radvd_uid }}"
+    create_home: no
+    home: /nonexistent
+    group: radvd
+    system: yes
+    shell: /usr/sbin/nologin
+    state: absent
+  become: true
+
+- name: Delete radvd.conf
+  ansible.builtin.file:
+    path: "/usr/local/etc/radvd.conf"
+    state: absent
+  become: true
+
+- name: Delete the radvd service file
+  ansible.builtin.file:
+    path: "/etc/rc.conf.d/radvd"
+    state: absent
+  become: true

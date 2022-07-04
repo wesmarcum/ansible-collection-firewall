@@ -1,0 +1,144 @@
+---
+### General
+
+firewall_unbound_enable: true
+firewall_unbound_username: "unbound"
+firewall_unbound_path: "/usr/local/etc/unbound"
+firewall_unbound_module_config: "validator iterator"
+firewall_unbound_max_ttl: 86400
+firewall_unbound_min_ttl: 300
+firewall_unbound_edns_buffer_size: 1232
+firewall_unbound_rrset_roundrobin: "yes"
+
+# List of private domains; used in unbound.conf to allow private IP addresses in responses.
+firewall_unbound_private_domains: []
+
+# List of additional networks to allow for dns queries; internal networks are already included.
+firewall_unbound_acl_networks: []
+
+# List of local zones; dnssec will be disabled for these zones. Each item should be a **dictionary** with 'zone' and 'type' keys.  'zone' is mandatory.
+firewall_unbound_local_zones: []
+
+# List of local zones (reverse lookups); defined in the same manner as forward zones.
+firewall_unbound_local_zones_rev: []
+
+# By default, generate local zone/data with a template, otherwise copy from local machine.
+firewall_unbound_local_zone_template: true
+
+# List of stub zones to forward to another resolver, usually used for local nsd.
+firewall_unbound_stub_zones: []
+
+# Default port to forward for upstream nameserver.
+firewall_unbound_stub_default_port: 53530
+
+# Enable dns resolution to upstream resolvers, otherwise use root servers.
+firewall_unbound_forward_enable: true
+
+# List of forward zones and resolvers.
+firewall_unbound_forward_zones:
+  - zone: "."
+    tls: true
+    forward_first: false
+    resolvers:
+      - ip_address: 9.9.9.9
+        port: 853
+        tls_name: dns.quad9.net
+      - ip_address: 149.112.112.112
+        port: 853
+        tls_name: dns.quad9.net
+      - ip_address: 2620:fe::fe
+        port: 853
+        tls_name: dns.quad9.net
+      - ip_address: 2620:fe::9
+        port: 853
+        tls_name: dns.quad9.net
+
+### Network
+
+firewall_unbound_port: 53
+firewall_unbound_enable_ipv4: "yes"
+firewall_unbound_enable_ipv6: "yes"
+firewall_unbound_enable_udp: "yes"
+firewall_unbound_enable_tcp: "yes"
+firewall_unbound_prefer_ipv6: "yes"
+firewall_unbound_tls_enable: false
+firewall_unbound_tls_service_key: "{{ firewall_unbound_path }}/cert/private.key"
+firewall_unbound_tls_service_pem: "{{ firewall_unbound_path }}/cert/public.pem"
+firewall_unbound_tls_doh_interfaces: []
+firewall_unbound_tls_doh_port: 443
+firewall_unbound_tls_dot_interfaces: []
+firewall_unbound_tls_dot_port: 853
+
+### Logging
+
+firewall_unbound_logging_verbosity: 2
+firewall_unbound_logfile: ""
+firewall_unbound_use_syslog: "yes"
+firewall_unbound_log_tag_queryreply: "yes"
+firewall_unbound_log_local_zone_actions: "no"
+firewall_unbound_log_queries: "no"
+firewall_unbound_log_replies: "no"
+firewall_unbound_log_servfail: "no"
+
+### Privacy
+
+firewall_unbound_aggressive_nsec: "yes"
+firewall_unbound_delay_close: 10000
+firewall_unbound_dnq_localhost: "no"
+firewall_unbound_neg_cache_size: "4M"
+firewall_unbound_qname_min: "yes"
+
+### Security
+
+firewall_unbound_deny_any: "yes"
+firewall_unbound_harden_algo_downgrade: "yes"
+firewall_unbound_harden_below_nxdomain: "yes"
+firewall_unbound_harden_dnssec_stripped: "yes"
+firewall_unbound_harden_glue: "yes"
+firewall_unbound_harden_large_queries: "yes"
+firewall_unbound_harden_referral_path: "no"
+firewall_unbound_harden_short_bufsize: "yes"
+firewall_unbound_hide_identity: "yes"
+firewall_unbound_hide_version: "yes"
+firewall_unbound_identity: "DNS"
+firewall_unbound_ratelimit: 1000
+firewall_unbound_unwanted_reply_threshold: 10000
+firewall_unbound_use_caps_for_id: "yes"
+firewall_unbound_val_clean_additional: "yes"
+
+### Performance
+
+firewall_unbound_infra_cache_slabs: 4
+firewall_unbound_incoming_num_tcp: 10
+firewall_unbound_key_cache_slabs: 4
+firewall_unbound_msg_cache_size: "50m"
+firewall_unbound_msg_cache_slabs: 4
+firewall_unbound_num_queries_per_thread: 4096
+firewall_unbound_num_threads: 4
+firewall_unbound_outgoing_range: 8192
+firewall_unbound_rrset_cache_size: "100m"
+firewall_unbound_rrset_cache_slabs: 4
+firewall_unbound_minimal_responses: "yes"
+firewall_unbound_prefetch: "yes"
+firewall_unbound_prefetch_key: "yes"
+firewall_unbound_serve_expired: "no"
+firewall_unbound_so_reuseport: "yes"
+firewall_unbound_jostle_timeout: 200
+firewall_unbound_infra_host_ttl: 900
+firewall_unbound_infra_cache_numhosts: 10000
+firewall_unbound_outgoing_num_tcp: 10
+
+### Statistics
+
+firewall_unbound_statistics_interval: 0
+firewall_unbound_extended_statistics: "yes"
+firewall_unbound_statistics_cumulative: "yes"
+
+### Dynamic blocking
+
+# Enable or disable dynamic blocking.
+firewall_unbound_dynamic_block: false
+
+# Dynamic block source url.  This can be any url in 'hostfile' format.
+# Recommend Steven Black's lists: https://github.com/StevenBlack/hosts.
+firewall_unbound_dynamic_block_url: "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"

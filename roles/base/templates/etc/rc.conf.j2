@@ -1,0 +1,21 @@
+# managed by ansible
+# generated for {{ ansible_fqdn }}
+
+### System options
+
+# Set dumpdev to "AUTO" to enable crash dumps, "NO" to disable
+dumpdev="NO"
+
+# Clear the temp directory on reboot
+clear_tmp_enable="YES"
+
+{% if firewall_zfs_enable | bool %}
+# Enable zfs
+zfs_enable="YES"
+
+{% endif %}
+{% if firewall_powerd_enable | bool %}
+# Enable powerd cpu scaling
+powerd_enable="YES"
+powerd_flags="{{ firewall_powerd_flags }}"
+{% endif %}

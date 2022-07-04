@@ -1,0 +1,34 @@
+---
+- name: Uninstall ipdbtools
+  ansible.builtin.package:
+    name: ipdbtools
+    state: absent
+  become: true
+
+- name: Disable cron job to update ipdb
+  ansible.builtin.cron:
+    name: "Update geoip db"
+    minute: 0
+    hour: 1
+    weekday: 0
+    user: root
+    job: "/usr/local/bin/ipdb-update.sh"
+    state: absent
+  become: true
+
+- name: Remove geoip script
+  ansible.builtin.file:
+    path: "/usr/local/bin/geoip_gen.sh"
+    state: absent
+  become: true
+
+- name: Disable cron job to update geoip tables for pf
+  ansible.builtin.cron:
+    name: "Update geoip tables for pf"
+    minute: 0
+    hour: 2
+    weekday: 0
+    user: root
+    job: "/usr/local/bin/geoip_gen.sh"
+    state: absent
+  become: true

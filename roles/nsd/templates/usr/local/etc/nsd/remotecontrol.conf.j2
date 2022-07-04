@@ -1,0 +1,28 @@
+# managed by ansible
+# generated for {{ ansible_fqdn }}
+
+remote-control:
+    # Enable remote control with nsd-control(8) here.
+    # set up the keys and certificates with nsd-control-setup.
+    control-enable: yes
+
+    # what interfaces are listened to for control, default is on localhost.
+    # with an absolute path, a unix local named pipe is used for control
+    # (and key and cert files are not needed, use directory permissions).
+    control-interface: 127.0.0.1
+    control-interface: ::1
+
+    # port number for remote control operations (uses TLS over TCP).
+    control-port: 8952
+
+    # nsd server key file for remote control.
+    server-key-file: "{{ firewall_nsd_path }}/nsd_server.key"
+
+    # nsd server certificate file for remote control.
+    server-cert-file: "{{ firewall_nsd_path }}/nsd_server.pem"
+
+    # nsd-control key file.
+    control-key-file: "{{ firewall_nsd_path }}/nsd_control.key"
+
+    # nsd-control certificate file.
+    control-cert-file: "{{ firewall_nsd_path }}/nsd_control.pem"

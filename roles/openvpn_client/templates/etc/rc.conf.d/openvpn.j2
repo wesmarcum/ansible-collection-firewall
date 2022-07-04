@@ -1,0 +1,7 @@
+# managed by ansible
+# generated for {{ ansible_fqdn }}
+
+openvpn_{{ item.name }}_enable="YES"
+openvpn_{{ item.name }}_flags=""
+openvpn_{{ item.name }}_configfile="{{ firewall_openvpn_client_path }}/{{ item.name }}/config.ovpn"
+openvpn_{{ item.name }}_dir="{{ firewall_openvpn_client_path }}/{{ item.name }}"

@@ -1,0 +1,19 @@
+# managed by ansible
+# generated for {{ ansible_fqdn }}
+
+# Daily.
+daily_output="{{ firewall_monitoring_email_mailto }}"
+daily_status_zfs_enable="YES"
+daily_status_zfs_zpool_list_enable="YES"
+daily_status_network_enable="YES"
+daily_status_network_usedns="NO"
+daily_status_ntpd_enable="YES"
+daily_status_security_output="{{ firewall_monitoring_email_mailto }}"
+
+# Weekly.
+weekly_output="{{ firewall_monitoring_email_mailto }}"
+weekly_status_security_output="{{ firewall_monitoring_email_mailto }}"
+
+# Monthly.
+monthly_output="{{ firewall_monitoring_email_mailto }}"
+monthly_status_security_output="{{ firewall_monitoring_email_mailto }}"

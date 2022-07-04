@@ -1,0 +1,11 @@
+---
+- name: restart kea
+  ansible.builtin.service:
+    name: kea
+    state: restarted
+  become: true
+
+- name: reload kea
+  ansible.builtin.command:
+    cmd: "/usr/local/sbin/keactrl reload"
+  become: true

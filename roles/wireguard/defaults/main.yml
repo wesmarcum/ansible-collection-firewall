@@ -1,0 +1,14 @@
+---
+### Wireguard
+
+firewall_wireguard_enable: true
+firewall_wireguard_path: "/usr/local/etc/wireguard"
+
+# Use experimental kernel module, otherwise use go.
+firewall_wireguard_use_kmod: false
+
+# Environment variables to pass - only applies to the go implementation.
+firewall_wireguard_env: ""
+
+# List of wireguard interfaces and parameters to configure.
+firewall_wireguard_conf: []

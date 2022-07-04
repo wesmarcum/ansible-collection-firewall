@@ -1,0 +1,4 @@
+# managed by ansible
+
+pf_reloader_enable="YES"
+pf_reloader_flags="reload"

@@ -1,0 +1,24 @@
+# managed by ansible
+# generated for {{ ansible_fqdn }}
+
+server:
+    {% if firewall_unbound_local_zones | length > 0 %}
+    # disable dnssec for local zones
+    {%  for item in firewall_unbound_local_zones %}
+    domain-insecure: "{{ item['zone'] | mandatory }}"
+    {%  endfor %}
+    {% endif %}
+
+    {% if firewall_unbound_local_zones | length > 0 %}
+    # define local zones and set zone type
+    {%  for item in firewall_unbound_local_zones %}
+    local-zone: "{{ item['zone'] | mandatory }}" {{ item['type'] | default('nodefault') }}
+    {%  endfor %}
+    {% endif %}
+
+    {% if firewall_unbound_local_zones_rev | length > 0 %}
+    # reverse lookup zones
+    {%  for item in firewall_unbound_local_zones_rev %}
+    local-zone: "{{ item['zone'] | mandatory }}" {{ item['type'] | default('nodefault') }}
+    {%  endfor %}
+    {% endif %}

@@ -1,0 +1,35 @@
+---
+namespace: wesmarcum
+name: firewall
+version: 1.0.0
+readme: README.md
+
+authors:
+  - wesmarcum
+
+description: A collection of roles to build a dedicated open source firewall based on FreeBSD.
+
+license:
+  - MIT
+
+tags:
+  - firewall
+  - pf
+  - freebsd
+  - security
+  - unbound
+  - nsd
+  - kea
+  - openvpn
+  - wireguard
+
+dependencies:
+  ansible.utils: ">=2.6.0"
+
+repository: https://github.com/wesmarcum/ansible-collection-firewall
+documentation: https://github.com/wesmarcum/ansible-collection-firewall
+homepage: https://github.com/wesmarcum/ansible-collection-firewall
+issues: https://github.com/wesmarcum/ansible-collection-firewall/issues
+
+build_ignore: []
+

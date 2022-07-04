@@ -1,0 +1,54 @@
+---
+- name: Stop the kea service
+  ansible.builtin.service:
+    name: kea
+    state: stopped
+  become: true
+
+- name: Uninstall kea package
+  ansible.builtin.package:
+    name: kea
+    state: absent
+  become: true
+
+- name: Remove dhcp4 lease file
+  ansible.builtin.file:
+    path: "{{ firewall_kea_lease_path }}/dhcp4.leases"
+    state: absent
+  become: true
+
+- name: Remove dhcp6 lease file
+  ansible.builtin.file:
+    path: "{{ firewall_kea_lease_path }}/dhcp6.leases"
+    state: absent
+  become: true
+
+- name: Remove lease directory
+  ansible.builtin.file:
+    path: "{{ firewall_kea_lease_path }}"
+    state: absent
+  become: true
+
+- name: Remove keactrl.conf
+  ansible.builtin.file:
+    path: "{{ firewall_kea_path }}/keactrl.conf"
+    state: absent
+  become: true
+
+- name: Remove kea-dhcp4.conf
+  ansible.builtin.file:
+    path: "{{ firewall_kea_path }}/kea-dhcp4.conf"
+    state: absent
+  become: true
+
+- name: Remove kea-dhcp6.conf
+  ansible.builtin.file:
+    path: "{{ firewall_kea_path }}/kea-dhcp6.conf"
+    state: absent
+  become: true
+
+- name: Remove the kea service file
+  ansible.builtin.file:
+    path: "/etc/rc.conf.d/kea"
+    state: absent
+  become: true

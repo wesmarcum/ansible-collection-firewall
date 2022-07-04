@@ -1,0 +1,36 @@
+---
+- name: Stop wireguard service
+  ansible.builtin.service:
+    name: wireguard
+    state: stopped
+  become: true
+
+- name: Remove wireguard packages (go)
+  ansible.builtin.package:
+    name:
+      - wireguard-go
+      - wireguard-tools
+    state: absent
+  become: true
+  when: not firewall_wireguard_use_kmod | bool
+
+- name: Remove wireguard packages (kmod)
+  ansible.builtin.package:
+    name:
+      - wireguard-kmod
+      - wireguard-tools
+    state: absent
+  become: true
+  when: firewall_wireguard_use_kmod | bool
+
+- name: Remove wireguard configuration files
+  ansible.builtin.file:
+    path: "{{ firewall_wireguard_path }}"
+    state: absent
+  become: true
+
+- name: Remove wireguard service file
+  ansible.builtin.file:
+    path: "/etc/rc.conf.d/wireguard"
+    state: absent
+  become: true

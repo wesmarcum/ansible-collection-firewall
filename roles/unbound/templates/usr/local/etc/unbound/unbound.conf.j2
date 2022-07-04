@@ -1,0 +1,445 @@
+# managed by ansible
+# generated for {{ ansible_fqdn }}
+
+##########################
+# Unbound Configuration
+##########################
+
+server:
+    ###
+    ### General
+    ###
+
+    chroot: "{{ firewall_unbound_path }}"
+    username: "{{ firewall_unbound_username }}"
+    directory: "{{ firewall_unbound_path }}"
+    pidfile: "{{ firewall_unbound_path }}/unbound.pid"
+    auto-trust-anchor-file: "{{ firewall_unbound_path }}/root.key"
+    root-hints: "{{ firewall_unbound_path }}/root.hints"
+    module-config: "{{ firewall_unbound_module_config }}"
+
+    # Time to live maximum for RRsets and messages in the cache. If the maximum
+    # kicks in, responses to clients still get decrementing TTLs based on the
+    # original (larger) values. When the internal TTL expires, the cache item
+    # has expired. Can be set lower to force the resolver to query for data
+    # often, and not trust (very large) TTL values.
+    cache-max-ttl: {{ firewall_unbound_max_ttl | int }}
+
+    # Time to live minimum for RRsets and messages in the cache. If the minimum
+    # kicks in, the data is cached for longer than the domain owner intended,
+    # and thus less queries are made to look up the data. Zero makes sure the
+    # data in the cache is as the domain owner intended, higher values,
+    # especially more than an hour or so, can lead to trouble as the data in
+    # the cache does not match up with the actual data any more.
+    cache-min-ttl: {{ firewall_unbound_min_ttl | int }}
+
+    # RFC 6891. Number of bytes size to advertise as the EDNS reassembly buffer
+    # size. This is the value put into  datagrams over UDP towards peers.
+    # The actual buffer size is determined by msg-buffer-size (both for TCP and
+    # UDP). Do not set higher than that value.
+    # Default  is  1232 which is the DNS Flag Day 2020 recommendation.
+    # Setting to 512 bypasses even the most stringent path MTU problems, but
+    # is seen as extreme, since the amount of TCP fallback generated is
+    # excessive (probably also for this resolver, consider tuning the outgoing
+    # tcp number).
+    edns-buffer-size: {{ firewall_unbound_edns_buffer_size | int }}
+
+    # Rotates RRSet order in response (the pseudo-random number is taken from
+    # the query ID, for speed and thread safety).
+    rrset-roundrobin: {{ firewall_unbound_rrset_roundrobin | string }}
+
+    ###
+    ### Network
+    ###
+
+    port: {{ firewall_unbound_port | int }}
+    do-ip4: {{ firewall_unbound_enable_ipv4 | string }}
+    do-ip6: {{ firewall_unbound_enable_ipv6 | string }}
+    prefer-ip6: {{ firewall_unbound_prefer_ipv6 | string }}
+    do-udp: {{ firewall_unbound_enable_udp | string }}
+    do-tcp: {{ firewall_unbound_enable_tcp | string }}
+    do-daemonize: yes
+
+    # Interface IP(s) to bind to
+    {% for int, data in firewall_interfaces.items() %}
+    {%  if not data.external | default(false) | bool %}
+    # {{ data.name | default(int) }}
+    {# check for valid ipv4 address #}
+    {%      if data.ipv4_address | default(omit) | ansible.utils.ipaddr %}
+    interface: {{ data.ipv4_address | ansible.utils.ipaddr('address') }}
+    {%      endif %}
+    {# check for valid ipv6 address #}
+    {%      if data.ipv6_address | default(omit) | ansible.utils.ipaddr %}
+    interface: {{ data.ipv6_address | ansible.utils.ipaddr('address') }}
+    {%      endif %}
+    {%  endif %}
+    {% endfor %}
+    # loopback
+    interface: 127.0.0.1
+    interface: ::1
+
+    {# TLS Configuration #}
+    {% if firewall_unbound_tls_enable %}
+    # TLS Global Configuration
+    tls-service-key: "{{ firewall_unbound_tls_service_key }}"
+    tls-service-pem: "{{ firewall_unbound_tls_service_pem }}"
+    https-port: {{ firewall_unbound_tls_doh_port | int }}
+    tls-port: {{ firewall_unbound_tls_dot_port | int }}
+    {# DNS over HTTPS #}
+    {%  if firewall_unbound_tls_doh_interfaces | length > 0 %}
+
+    # DoH Interfaces
+    {%      for int in firewall_unbound_tls_doh_interfaces %}
+    {# check for valid ipv4 address #}
+    {%          if firewall_interfaces[int].ipv4_address | default(omit) | ansible.utils.ipaddr %}
+    interface: {{ firewall_interfaces[int].ipv4_address | ansible.utils.ipaddr('address') }}@{{ firewall_unbound_tls_doh_port }}
+    {%          endif %}
+    {# check for valid ipv6 address #}
+    {%          if firewall_interfaces[int].ipv6_address | default(omit) | ansible.utils.ipaddr %}
+    interface: {{ firewall_interfaces[int].ipv6_address | ansible.utils.ipaddr('address') }}@{{ firewall_unbound_tls_doh_port }}
+    {%          endif %}
+    {%      endfor %}
+    {%  endif %}
+    {# DNS over TLS #}
+    {%  if firewall_unbound_tls_dot_interfaces | length > 0 %}
+
+    # DoT Interfaces
+    {%      for int in firewall_unbound_tls_dot_interfaces %}
+    {# check for valid ipv4 address #}
+    {%          if firewall_interfaces[int].ipv4_address | default(omit) | ansible.utils.ipaddr %}
+    interface: {{ firewall_interfaces[int].ipv4_address | ansible.utils.ipaddr('address') }}@{{ firewall_unbound_tls_dot_port }}
+    {%          endif %}
+    {# check for valid ipv6 address #}
+    {%          if firewall_interfaces[int].ipv6_address | default(omit) | ansible.utils.ipaddr %}
+    interface: {{ firewall_interfaces[int].ipv6_address | ansible.utils.ipaddr('address') }}@{{ firewall_unbound_tls_dot_port }}
+    {%          endif %}
+    {%      endfor %}
+    {%  endif %}
+    {% endif %}
+
+    ###
+    ### Logging
+    ###
+
+    # The  verbosity  number, level 0 means no verbosity, only errors.
+    # Level 1 gives operational information. Level  2  gives  detailed
+    # operational  information. Level 3 gives query level information,
+    # output per query.  Level 4 gives  algorithm  level  information.
+    # Level 5 logs client identification for cache misses.  Default is
+    # level 1.
+    verbosity: {{ firewall_unbound_logging_verbosity | int }}
+
+    # disable logging to text file
+    logfile: "{{ firewall_unbound_logfile }}"
+
+    # enable logging to syslog
+    use-syslog: {{ firewall_unbound_use_syslog | string }}
+
+    # print 'query' and 'reply' with log entries
+    log-tag-queryreply: {{ firewall_unbound_log_tag_queryreply | string }}
+
+    # Do not print log lines to inform about local zone actions
+    log-local-actions: {{ firewall_unbound_log_local_zone_actions | string }}
+
+    # Do not print one line per query to the log
+    log-queries: {{ firewall_unbound_log_queries | string }}
+
+    # Do not print one line per reply to the log
+    log-replies: {{ firewall_unbound_log_replies | string }}
+
+    # Do not print log lines that say why queries return SERVFAIL to clients
+    log-servfail: {{ firewall_unbound_log_servfail | string }}
+
+    ###
+    ### Privacy
+    ###
+
+    # RFC 8198. Use the DNSSEC NSEC chain to synthesize NXDO-MAIN and other
+    # denials, using information from previous NXDO-MAINs answers. In other
+    # words, use cached NSEC records to generate negative answers within a
+    # range and positive answers from wildcards. This increases performance,
+    # decreases latency and resource utilization on both authoritative and
+    # recursive servers, and increases privacy. Also, it may help increase
+    # resilience to certain DoS attacks in some circumstances.
+    aggressive-nsec: {{ firewall_unbound_aggressive_nsec | string }}
+
+    # Extra delay for timeouted UDP ports before they are closed, in msec.
+    # This prevents very delayed answer packets from the upstream (recursive)
+    # servers from bouncing against closed ports and setting off all sort of
+    # close-port counters, with eg. 1500 msec. When timeouts happen you need
+    # extra sockets, it checks the ID and remote IP of packets, and unwanted
+    # packets are added to the unwanted packet counter.
+    delay-close: {{ firewall_unbound_delay_close }}
+
+    # Add localhost to the do-not-query-address list.
+    do-not-query-localhost: {{ firewall_unbound_dnq_localhost | string }}
+
+    # Number of bytes size of the aggressive negative cache.
+    neg-cache-size: {{ firewall_unbound_neg_cache_size | string }}
+
+    # Send minimum amount of information to upstream servers to enhance
+    # privacy (best privacy).
+    qname-minimisation: {{ firewall_unbound_qname_min | string }}
+
+    ###
+    ### Security
+    ###
+
+    # Only give access to recursion clients from LAN IPs - import access lists
+    include: {{ firewall_unbound_path }}/access_lists.conf
+
+    # Deny queries of type ANY with an empty response.
+    deny-any: {{ firewall_unbound_deny_any | string }}
+
+    # Harden against algorithm downgrade when multiple algorithms are
+    # advertised in the DS record.
+    harden-algo-downgrade: {{ firewall_unbound_harden_algo_downgrade | string }}
+
+    # RFC 8020. returns nxdomain to queries for a name below another name that
+    # is already known to be nxdomain.
+    harden-below-nxdomain: {{ firewall_unbound_harden_below_nxdomain | string }}
+
+    # Require DNSSEC data for trust-anchored zones, if such data is absent, the
+    # zone becomes bogus. If turned off you run the risk of a downgrade attack
+    # that disables security for a zone.
+    harden-dnssec-stripped: {{ firewall_unbound_harden_dnssec_stripped | string }}
+
+    # Only trust glue if it is within the servers authority.
+    harden-glue: {{ firewall_unbound_harden_glue | string }}
+
+    # Ignore very large queries.
+    harden-large-queries: {{ firewall_unbound_harden_large_queries | string }}
+
+    # Perform additional queries for infrastructure data to harden the referral
+    # path. Validates the replies if trust anchors are configured and the zones
+    # are signed. This enforces DNSSEC validation on nameserver NS sets and the
+    # nameserver addresses that are encountered on the referral path to the
+    # answer. Experimental option.
+    harden-referral-path: {{ firewall_unbound_harden_referral_path | string }}
+
+    # Ignore very small EDNS buffer sizes from queries.
+    harden-short-bufsize: {{ firewall_unbound_harden_short_bufsize | string }}
+
+    # Refuse id.server and hostname.bind queries
+    hide-identity: {{ firewall_unbound_hide_identity | string }}
+
+    # Refuse version.server and version.bind queries
+    hide-version: {{ firewall_unbound_hide_version | string }}
+
+    # Report this identity rather than the hostname of the server.
+    identity: "{{ firewall_unbound_identity | string }}"
+
+    # These private network addresses are not allowed to be returned for public
+    # internet names. Any  occurrence of such addresses are removed from DNS
+    # answers. Additionally, the DNSSEC validator may mark the  answers  bogus.
+    # This  protects  against DNS  Rebinding
+    private-address: 10.0.0.0/8
+    private-address: 127.0.0.0/8
+    private-address: 169.254.0.0/16
+    private-address: 172.16.0.0/12
+    private-address: 192.168.0.0/16
+    private-address: ::ffff:a00:0/104
+    private-address: ::ffff:a9fe:0/112
+    private-address: ::ffff:ac10:0/108
+    private-address: ::ffff:c0a8:0/112
+    private-address: fd00::/8
+    private-address: fe80::/10
+
+    # Define private domains.  This permits replies with private ip space.
+    {# read domains from main interface configuration #}
+    {% for int in firewall_interfaces %}
+    {%  if (firewall_interfaces[int].domain is defined) and (not firewall_interfaces[int].external | default(false) | bool) %}
+    private-domain: "{{ firewall_interfaces[int].domain }}"
+    {%  endif %}
+    {% endfor %}
+    {# user defined private domains #}
+    {% if firewall_unbound_private_domains | length > 0 %}
+    {%  for domain in firewall_unbound_private_domains %}
+    private-domain: "{{ domain }}"
+    {%  endfor %}
+    {% endif %}
+
+    # Enable ratelimiting of queries (per second) sent to nameserver for
+    # performing recursion. More queries are turned away with an error
+    # (servfail). This stops recursive floods (e.g., random query names), but
+    # not spoofed reflection floods. Cached responses are not rate limited by
+    # this setting. Experimental option.
+    ratelimit: {{ firewall_unbound_ratelimit | int }}
+
+    # Use this certificate bundle for authenticating connections made to
+    # outside peers (e.g., auth-zone urls, DNS over TLS connections).
+    tls-cert-bundle: "/usr/local/share/certs/ca-root-nss.crt"
+
+    # Set the total number of unwanted replies to keep track of in every thread.
+    # When it reaches the threshold, a defensive action of clearing the rrset
+    # and message caches is taken, hopefully flushing away any poison.
+    # Unbound suggests a value of 10 million.
+    unwanted-reply-threshold: {{ firewall_unbound_unwanted_reply_threshold | int }}
+
+    # Use 0x20-encoded random bits in the query to foil spoof attempts. This
+    # perturbs the lowercase and uppercase of query names sent to authority
+    # servers and checks if the reply still has the correct casing.
+    # This feature is an experimental implementation of draft dns-0x20.
+    # Experimental option.
+    use-caps-for-id: {{ firewall_unbound_use_caps_for_id | string }}
+
+    # Help protect users that rely on this validator for authentication from
+    # potentially bad data in the additional section. Instruct the validator to
+    # remove data from the additional section of secure messages that are not
+    # signed properly. Messages that are insecure, bogus, indeterminate or
+    # unchecked are not affected.
+    val-clean-additional: {{ firewall_unbound_val_clean_additional | string }}
+
+    ###
+    ### Performance
+    ###
+    # https://nlnetlabs.nl/documentation/unbound/howto-optimise/
+    # https://nlnetlabs.nl/news/2019/Feb/05/unbound-1.9.0-released/
+
+    # Number of slabs in the infrastructure cache. Slabs reduce lock contention
+    # by threads. Must be set to a power of 2.
+    infra-cache-slabs: {{ firewall_unbound_infra_cache_slabs | int }}
+
+    # Number of incoming TCP buffers to allocate per thread. Default
+    # is 10. If set to 0, or if do-tcp is "no", no  TCP  queries  from
+    # clients  are  accepted. For larger installations increasing this
+    # value is a good idea.
+    incoming-num-tcp: {{ firewall_unbound_incoming_num_tcp | int }}
+
+    # Number of slabs in the key cache. Slabs reduce lock contention by
+    # threads. Must be set to a power of 2. Setting (close) to the number
+    # of cpus is a reasonable guess.
+    key-cache-slabs: {{ firewall_unbound_key_cache_slabs | int }}
+
+    # Number  of  bytes  size  of  the  message  cache.
+    # Unbound recommendation is to Use roughly twice as much rrset cache memory
+    # as you use msg cache memory.
+    msg-cache-size: {{ firewall_unbound_msg_cache_size | string }}
+
+    # Number of slabs in the message cache. Slabs reduce lock contention by
+    # threads. Must be set to a power of 2. Setting (close) to the number of
+    # cpus is a reasonable guess.
+    msg-cache-slabs: {{ firewall_unbound_msg_cache_slabs | int }}
+
+    # The number of queries that every thread will service simultaneously. If
+    # more queries arrive that need servicing, and no queries can be jostled
+    # out (see jostle-timeout), then the queries are dropped.
+    # This is best set at half the number of the outgoing-range.
+    # This Unbound instance was compiled with libevent so it can efficiently
+    # use more than 1024 file descriptors.
+    num-queries-per-thread: {{ firewall_unbound_num_queries_per_thread | int }}
+
+    # The number of threads to create to serve clients.
+    # This is set dynamically at run time to effectively use available CPUs
+    # resources
+    num-threads: {{ firewall_unbound_num_threads | int }}
+
+    # Number of ports to open. This number of file descriptors can be opened
+    # per thread.
+    # This Unbound instance was compiled with libevent so it can efficiently
+    # use more than 1024 file descriptors.
+    outgoing-range: {{ firewall_unbound_outgoing_range | int }}
+
+    # Number of bytes size of the RRset cache.
+    # Use roughly twice as much rrset cache memory as msg cache memory
+    rrset-cache-size: {{ firewall_unbound_rrset_cache_size | string }}
+
+    # Number of slabs in the RRset cache. Slabs reduce lock contention by
+    # threads. Must be set to a power of 2.
+    rrset-cache-slabs: {{ firewall_unbound_rrset_cache_slabs | int }}
+
+    # Do no insert authority/additional sections into response messages when
+    # those sections are not required. This reduces response size
+    # significantly, and may avoid TCP fallback for some responses. This may
+    # cause a slight speedup.
+    minimal-responses: {{ firewall_unbound_minimal_responses | string }}
+
+    # If yes, message cache elements are prefetched before they expire to
+    # keep the cache up to date. Default is no. Turning it on gives about
+    # 10 percent more traffic and load on the machine, but popular items do
+    # not expire from the cache.
+    prefetch: {{ firewall_unbound_prefetch | string }}
+
+    # Fetch the DNSKEYs earlier in the validation process, when a DS record is
+    # encountered. This lowers the latency of requests at the expense of little
+    # more CPU usage.
+    prefetch-key: {{ firewall_unbound_prefetch_key | string }}
+
+    # Have unbound attempt to serve old responses from cache with a TTL of 0 in
+    # the response without waiting for the actual resolution to finish. The
+    # actual resolution answer ends up in the cache later on.
+    serve-expired: {{ firewall_unbound_serve_expired | string }}
+
+    # Open dedicated listening sockets for incoming queries for each thread and
+    # try to set the SO_REUSEPORT socket option on each socket. May distribute
+    # incoming queries to threads more evenly.
+    so-reuseport: {{ firewall_unbound_so_reuseport | string }}
+
+    # Timeout used when the server is very busy.  Set to a value that
+    # usually results in one roundtrip to the authority  servers.  If
+    # too  many queries arrive, then 50% of the queries are allowed to
+    # run to completion, and the other 50% are replaced with the new
+    # incoming  query if they have already spent more than their al-
+    # lowed time.
+    jostle-timeout: {{ firewall_unbound_jostle_timeout | int }}
+
+    # Time to live for entries in the host cache. The host cache con-
+    # tains roundtrip timing, lameness and EDNS  support  information.
+    # Default is 900.
+    infra-host-ttl: {{ firewall_unbound_infra_host_ttl | int }}
+
+    # Number of hosts for which information is  cached.  Default is 10000.
+    infra-cache-numhosts: {{ firewall_unbound_infra_cache_numhosts | int }}
+
+    # Number of outgoing TCP buffers to allocate per thread.
+    outgoing-num-tcp: {{ firewall_unbound_outgoing_num_tcp | int }}
+
+    ###
+    ### Statistics
+    ###
+
+    statistics-interval: {{ firewall_unbound_statistics_interval | int }}
+    extended-statistics: {{ firewall_unbound_extended_statistics | string }}
+    statistics-cumulative: {{ firewall_unbound_statistics_cumulative | string }}
+
+    ###
+    ### Local zone
+    ###
+
+    include-toplevel: "{{ firewall_unbound_path }}/local_zone.conf"
+
+    ###
+    ### Static blocklist
+    ###
+
+    include-toplevel: "{{ firewall_unbound_path }}/static_block.conf"
+    {% if firewall_unbound_dynamic_block | bool %}
+
+    ###
+    ### Dynamic blocklist
+    ###
+
+    include-toplevel: "{{ firewall_unbound_path }}/dynamic_block.conf"
+    {% endif %}
+    {% if firewall_unbound_stub_zones | length > 0 %}
+
+    ###
+    ### Stub Zones
+    ###
+
+    include-toplevel: "{{ firewall_unbound_path }}/stub_zone.conf"
+    {% endif %}
+    {% if firewall_unbound_forward_enable | bool %}
+
+    ###
+    ### Forward zone
+    ###
+
+    include-toplevel: "{{ firewall_unbound_path }}/forward_zone.conf"
+    {% endif %}
+
+    ###
+    ### Remote Control
+    ###
+
+    include-toplevel: "{{ firewall_unbound_path }}/remotecontrol.conf"

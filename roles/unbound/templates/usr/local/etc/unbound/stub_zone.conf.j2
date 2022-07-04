@@ -1,0 +1,21 @@
+# managed by ansible
+# generated for {{ ansible_fqdn }}
+
+{% if firewall_unbound_stub_zones | length > 0 %}
+# stub zones
+{%  for item in firewall_unbound_stub_zones %}
+stub-zone:
+    name: "{{ item['zone'] | mandatory }}"
+{%      if item['nameservers'] is defined %}
+{%          for server in item['nameservers'] %}
+    stub-addr: {{ server['ip'] }}@{{ server['port'] }}
+{%          endfor %}
+{%      else %}
+    stub-addr: ::1@{{ firewall_unbound_stub_default_port | int }}
+    stub-addr: 127.0.0.1@{{ firewall_unbound_stub_default_port | int }}
+{%      endif %}
+{%      if not loop.last %}
+
+{%      endif %}
+{%  endfor %}
+{% endif %}

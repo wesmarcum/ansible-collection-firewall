@@ -1,0 +1,207 @@
+# managed by ansible
+# generated for {{ ansible_fqdn }}
+
+# default interface (leave empty for automatic selection)
+Interface "{{ firewall_monitoring_vnstat_default_int }}"
+
+# location of the database directory
+DatabaseDir "{{ firewall_monitoring_vnstat_db_path }}"
+
+# locale (LC_ALL) ("-" = use system locale)
+Locale "-"
+
+# date output formats for -d, -m, -t and -w
+DayFormat    "%Y-%m-%d"
+MonthFormat  "%Y-%m"
+TopFormat    "%Y-%m-%d"
+
+# characters used for visuals
+RXCharacter       "%"
+TXCharacter       ":"
+RXHourCharacter   "r"
+TXHourCharacter   "t"
+
+# how units are prefixed when traffic is shown
+# 0 = IEC standard prefixes (KiB/MiB/GiB...)
+# 1 = old style binary prefixes (KB/MB/GB...)
+# 2 = SI decimal prefixes (kB/MB/GB...)
+UnitMode {{ firewall_monitoring_vnstat_unitmode }}
+
+# used rate unit (0 = bytes, 1 = bits)
+RateUnit {{ firewall_monitoring_vnstat_rateunit }}
+
+# how units are prefixed when traffic rate is shown in bits
+# 0 = IEC binary prefixes (Kibit/s...)
+# 1 = SI decimal prefixes (kbit/s...)
+RateUnitMode {{ firewall_monitoring_vnstat_rateunitmode }}
+
+# output style
+# 0 = minimal & narrow, 1 = bar column visible
+# 2 = same as 1 except rate in summary
+# 3 = rate column visible
+OutputStyle {{ firewall_monitoring_vnstat_outputstyle }}
+EstimateBarVisible {{ firewall_monitoring_vnstat_estbarvisible }}
+
+# number of decimals to use in outputs
+DefaultDecimals 2
+HourlyDecimals 1
+
+# spacer for separating hourly sections (0 = none, 1 = '|', 2 = '][', 3 = '[ ]')
+HourlySectionStyle 2
+
+# how many seconds should sampling for -tr take by default
+Sampletime 5
+
+# default query mode
+# 0 = normal, 1 = days, 2 = months, 3 = top, 5 = short
+# 7 = hours, 8 = xml, 9 = one line, 10 = json
+QueryMode 0
+
+# default list output entry limits (0 = all)
+List5Mins      24
+ListHours      24
+ListDays       30
+ListMonths     12
+ListYears       0
+ListTop        10
+
+
+# vnstatd
+##
+
+# switch to given user when started as root (leave empty to disable)
+DaemonUser "{{ firewall_monitoring_vnstat_user }}"
+
+# switch to given group when started as root (leave empty to disable)
+DaemonGroup "{{ firewall_monitoring_vnstat_group }}"
+
+# try to detect interface maximum bandwidth, 0 = disable feature
+# MaxBandwidth will be used as fallback value when enabled
+BandwidthDetection {{ firewall_monitoring_vnstat_bwdetect }}
+
+# maximum bandwidth (Mbit) for all interfaces, 0 = disable feature
+# (unless interface specific limit is given)
+MaxBandwidth {{ firewall_monitoring_vnstat_maxbw }}
+
+# interface specific limits
+#  example 8Mbit limit for 'ethnone':
+MaxBWethnone 8
+
+# data retention durations (-1 = unlimited, 0 = feature disabled)
+5MinuteHours   {{ firewall_monitoring_vnstat_5minute_hours }}
+HourlyDays     {{ firewall_monitoring_vnstat_hourly_days }}
+DailyDays      {{ firewall_monitoring_vnstat_daily_days }}
+MonthlyMonths  {{ firewall_monitoring_vnstat_monthly_months }}
+YearlyYears    {{ firewall_monitoring_vnstat_yearly_years }}
+TopDayEntries  {{ firewall_monitoring_vnstat_topdayentries }}
+
+# how often (in seconds) interface data is updated
+UpdateInterval {{ firewall_monitoring_vnstat_updateinterval }} 
+
+# how often (in seconds) interface status changes are checked
+PollInterval {{ firewall_monitoring_vnstat_pollinterval }}
+
+# how often (in minutes) data is saved to database
+SaveInterval {{ firewall_monitoring_vnstat_saveinterval }}
+
+# how often (in minutes) data is saved when all interface are offline
+OfflineSaveInterval 30
+
+# on which day should months change
+MonthRotate {{ firewall_monitoring_vnstat_monthrotate }}
+MonthRotateAffectsYears 0
+
+# filesystem disk space check (1 = enabled, 0 = disabled)
+CheckDiskSpace 1
+
+# how much the boot time can variate between updates (seconds)
+BootVariation 15
+
+# create database entries even when there is no traffic (1 = enabled, 0 = disabled)
+TrafficlessEntries 1
+
+# how many minutes to wait during daemon startup for system clock to
+# sync time if most recent database update appears to be in the future
+TimeSyncWait 5
+
+# how often (in minutes) bandwidth detection is done when
+# BandwidthDetection is enabled (0 = disabled)
+BandwidthDetectionInterval 5
+
+# force data save when interface status changes (1 = enabled, 0 = disabled)
+SaveOnStatusChange 1
+
+# enable / disable logging (0 = disabled, 1 = logfile, 2 = syslog)
+UseLogging {{ firewall_monitoring_vnstat_uselogging }}
+
+# create dirs if needed (1 = enabled, 0 = disabled)
+CreateDirs 1
+
+# update ownership of files if needed (1 = enabled, 0 = disabled)
+UpdateFileOwner 1
+
+# file used for logging if UseLogging is set to 1
+LogFile "{{ firewall_monitoring_vnstat_logfile }}"
+
+# file used as daemon pid / lock file
+PidFile "/var/run/vnstat/vnstat.pid"
+
+# 1 = 64-bit, 0 = 32-bit, -1 = old style logic, -2 = automatic detection
+64bitInterfaceCounters -2
+
+# use SQLite Write-Ahead Logging mode (1 = enabled, 0 = disabled)
+DatabaseWriteAheadLogging 0
+
+# change the setting of the SQLite "synchronous" flag
+# (-1 = auto, 0 = off, 1, = normal, 2 = full, 3 = extra)
+DatabaseSynchronous -1
+
+
+# vnstati
+##
+
+# title timestamp format
+HeaderFormat "%Y-%m-%d %H:%M"
+
+# show hours with rate (1 = enabled, 0 = disabled)
+HourlyRate 1
+
+# show rate in summary (1 = enabled, 0 = disabled)
+SummaryRate 1
+
+# transparent background (1 = enabled, 0 = disabled)
+TransparentBg 0
+
+# image size control
+LargeFonts 0
+LineSpacingAdjustment 0
+ImageScale 100
+
+# 5 minutes graph size control
+5MinuteGraphResultCount 576
+5MinuteGraphHeight 300
+
+# horizontal/vertical summary graph (0 = hours, 1 = 5 minutes)
+SummaryGraph 0
+
+# traffic estimate bar style
+# (0 = not shown, 1 = continuation of existing bar, 2 = separate bar)
+EstimateStyle 1
+
+# bar column in list outputs shows rate if OutputStyle is 3
+# (1 = enabled, 0 = disabled)
+BarColumnShowsRate 0
+
+# image colors
+CBackground     "FFFFFF"
+CEdge           "AEAEAE"
+CHeader         "606060"
+CHeaderTitle    "FFFFFF"
+CHeaderDate     "FFFFFF"
+CText           "000000"
+CLine           "B0B0B0"
+CLineL          "-"
+CRx             "92CF00"
+CTx             "606060"
+CRxD            "-"
+CTxD            "-"

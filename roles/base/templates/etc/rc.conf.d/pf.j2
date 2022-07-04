@@ -1,0 +1,6 @@
+# managed by ansible
+# generated for {{ ansible_fqdn }}
+
+pf_enable="YES"                 # Enable PF (load module if required)
+pf_rules="{{ firewall_pf_rules }}"      # rules definition file for PF
+pf_flags=""                     # additional flags for pfctl startup

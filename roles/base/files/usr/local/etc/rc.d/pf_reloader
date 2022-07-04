@@ -1,0 +1,25 @@
+#!/bin/sh
+#
+
+# PROVIDE: pf_reloader
+# REQUIRE: pf unbound nsd
+
+pf_reloader_enable=${pf_reloader_enable-"NO"}
+pf_reloader_flags=${pf_reloader_flags-""}
+
+. /etc/rc.subr
+
+name="pf_reloader"
+rcvar=`set_rcvar`
+command="/etc/rc.d/pf"
+
+load_rc_config $name
+
+start_cmd="pf_reloader_start"
+
+pf_reloader_start()
+{
+        ${command} ${pf_reloader_flags}
+}
+
+run_rc_command "$1"

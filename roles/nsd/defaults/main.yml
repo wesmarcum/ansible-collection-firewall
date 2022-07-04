@@ -1,0 +1,80 @@
+---
+### General
+
+firewall_nsd_enable: true
+firewall_nsd_username: "nsd"
+firewall_nsd_path: "/usr/local/etc/nsd"
+firewall_nsd_server_count: 2
+firewall_nsd_zonefiles_check: "yes"
+firewall_nsd_debug_mode: "no"
+
+# List of authoritative zones for nsd
+# Each entry should be a dictionary with a 'name' and 'zonefile' attributes.
+firewall_nsd_zones: []
+
+### Network
+
+firewall_nsd_port: 53530
+firewall_nsd_interfaces:
+  - ::1
+  - 127.0.0.1
+firewall_nsd_enable_ipv4: "yes"
+firewall_nsd_enable_ipv6: "yes"
+firewall_nsd_ip_transparent: "no"
+firewall_nsd_ip_freebind: "no"
+firewall_nsd_tls_enable: false
+firewall_nsd_tls_port: 853
+firewall_nsd_tls_interfaces: []
+firewall_nsd_tls_service_key: "{{ firewall_nsd_path }}/cert/private.key"
+firewall_nsd_tls_service_pem: "{{ firewall_nsd_path }}/cert/public.pem"
+firewall_nsd_tls_service_ocsp: ""
+
+### Logging
+
+firewall_nsd_logging_verbosity: 2
+firewall_nsd_logfile: "/var/log/nsd.log"
+firewall_nsd_log_only_syslog: "no"
+firewall_nsd_log_time_ascii: "yes"
+
+### Security
+
+firewall_nsd_refuse_any: "yes"
+firewall_nsd_hide_version: "yes"
+firewall_nsd_hide_identity: "yes"
+firewall_nsd_drop_updates: "no"
+firewall_nsd_version: "DNS"
+firewall_nsd_identity: "DNS"
+firewall_nsd_nsid: ""
+firewall_nsd_minimal_responses: "no"
+firewall_nsd_confine_to_zone: "no"
+
+# Secret settings for zone transfers.  By default, the template will read the variable below from a vault.
+firewall_nsd_secret: "{{ vault_firewall_nsd_secret }}"
+firewall_nsd_secret_hash: "hmac-sha256"
+
+### Performance
+
+firewall_nsd_reuseport: "no"
+firewall_nsd_send_buffer: 1048576
+firewall_nsd_receive_buffer: 1048576
+firewall_nsd_tcp_count: 100
+firewall_nsd_tcp_reject_overflow: "no"
+firewall_nsd_tcp_query_count: 0
+firewall_nsd_tcp_timeout: 120
+firewall_nsd_tcp_mss: 0
+firewall_nsd_outgoing_tcp_mss: 0
+firewall_nsd_ipv4_edns_size: 1232
+firewall_nsd_ipv6_edns_size: 1232
+firewall_nsd_xfrd_reload_timeout: 1
+firewall_nsd_rrl_size: 1000000
+firewall_nsd_rrl_ratelimit: 200
+firewall_nsd_rrl_slip: 2
+firewall_nsd_rrl_ipv4_prefix_length: 24
+firewall_nsd_rrl_ipv6_prefix_length: 64
+firewall_nsd_rrl_whitelist_ratelimit: 2000
+firewall_nsd_round_robin: "no"
+firewall_nsd_zonefiles_write: 3600
+
+### Statistics
+
+firewall_nsd_statistics_interval: 3600

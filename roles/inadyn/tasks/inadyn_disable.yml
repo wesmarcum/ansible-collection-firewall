@@ -1,0 +1,24 @@
+---
+- name: Stop inadyn service
+  ansible.builtin.service:
+    name: inadyn
+    state: stopped
+  become: true
+
+- name: Uninstall inadyn
+  ansible.builtin.package:
+    name: inadyn
+    state: absent
+  become: true
+
+- name: Remove inadyn config
+  ansible.builtin.file:
+    path: "{{ firewall_inadyn_conf_file }}"
+    state: absent
+  become: true
+
+- name: Remove inadyn service file
+  ansible.builtin.file:
+    path: "/etc/rc.conf.d/inadyn"
+    state: absent
+  become: true

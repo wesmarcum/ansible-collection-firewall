@@ -1,0 +1,23 @@
+#!/bin/sh
+# managed by ansible
+# generated for {{ ansible_fqdn }}
+
+# list of country codes to generate
+country_codes={{ firewall_geoip_country_codes | join(':') }}
+use_ipv6={{ firewall_geoip_include_ipv6 | bool }}
+ipv4_path="{{ firewall_geoip_ipv4_file }}"
+ipv6_path="{{ firewall_geoip_ipv6_file }}"
+
+/usr/local/bin/ipup -4 -p -t "$country_codes" > "$ipv4_path"
+chown root:wheel "$ipv4_path"
+chmod 0640 "$ipv4_path"
+
+if [ "$use_ipv6" = "True" ]; then
+    /usr/local/bin/ipup -6 -p -t "$country_codes" > "$ipv6_path"
+    chown root:wheel "$ipv6_path"
+    chmod 0640 "$ipv6_path"
+fi
+
+# update tables in pf
+pfctl -t geoblock_ipv4 -T replace -f {{ firewall_geoip_ipv4_file }}
+pfctl -t geoblock_ipv6 -T replace -f {{ firewall_geoip_ipv6_file }}

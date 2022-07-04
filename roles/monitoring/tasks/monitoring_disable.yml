@@ -1,0 +1,95 @@
+---
+- name: Uninstall monitoring packages
+  ansible.builtin.package:
+    name: "{{ firewall_monitoring_packages }}"
+    state: absent
+  become: true
+
+- name: Remove vnstat
+  block:
+    - name: Stop vnstat
+      ansible.builtin.service:
+        name: vnstat
+        state: stopped
+      become: true
+
+    - name: Remove vnstat logfile
+      ansible.builtin.file:
+        path: "{{ firewall_monitoring_vnstat_logfile }}"
+        state: absent
+      become: true
+      when: firewall_monitoring_vnstat_uselogging | int == 1
+
+    - name: Remove vnstat db dir
+      ansible.builtin.file:
+        path: "{{ firewall_monitoring_vnstat_db_path }}"
+        state: absent
+      become: true
+
+    - name: Remove vnstat service file
+      ansible.builtin.file:
+        path: "/etc/rc.conf.d/vnstat"
+        state: absent
+      become: true
+
+    - name: Remove vnstat configuration
+      ansible.builtin.file:
+        path: "{{ firewall_monitoring_vnstat_config }}"
+        state: absent
+      become: true
+
+    - name: Remove newsyslog file for vnstat
+      ansible.builtin.file:
+        path: "/usr/local/etc/newsyslog.conf.d/vnstat.conf"
+        state: absent
+      become: true
+      when: firewall_monitoring_vnstat_uselogging | int == 1
+  when: firewall_monitoring_vnstat_enable | bool is false
+
+- name: Disable email reports
+  block:
+    - name: Remove sendmail service configuration
+      ansible.builtin.file:
+        path: "/etc/rc.conf.d/sendmail"
+        state: absent
+      become: true
+
+    - name: Start sendmail service
+      ansible.builtin.service:
+        name: sendmail
+        state: started
+      become: true
+
+    - name: Uninstall ssmtp
+      ansible.builtin.package:
+        name: ssmtp
+        state: absent
+      become: true
+
+    - name: Remove ssmtp configuration
+      ansible.builtin.file:
+        path: "{{ firewall_monitoring_ssmtp_path }}/ssmtp.conf"
+        state: absent
+      become: true
+
+    - name: Remove mail aliases
+      ansible.builtin.file:
+        path: "{{ firewall_monitoring_ssmtp_path }}/revaliases"
+        state: absent
+      become: true
+
+    - name: Set mailer configuration to default
+      ansible.builtin.copy:
+        src: "etc/mail/mailer.conf"
+        dest: "/etc/mail/mailer.conf"
+        owner: root
+        group: wheel
+        mode: 0644
+      become: true
+
+    - name: Remove periodic configuration
+      ansible.builtin.file:
+        path: "/etc/periodic.conf"
+        state: absent
+      become: true
+  when: firewall_monitoring_email_enable | bool is false

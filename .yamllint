@@ -1,0 +1,17 @@
+---
+extends: default
+
+rules:
+  braces:
+    min-spaces-inside: 0
+    max-spaces-inside: 1
+  empty-lines:
+    max: 3
+    max-end: 1
+    level: error
+  comments-indentation: disable
+  line-length:
+    max: 200
+    level: warning
+  truthy:
+    allowed-values: ['true', 'false', 'True', 'False', 'yes', 'no', 'Yes', 'No']

@@ -1,0 +1,124 @@
+---
+- name: Install openvpn package
+  ansible.builtin.package:
+    name: openvpn
+    state: present
+  become: true
+
+- name: Create openvpn group
+  ansible.builtin.group:
+    name: openvpn
+    gid: "{{ firewall_openvpn_client_gid }}"
+    system: yes
+    state: present
+  become: true
+
+- name: Create openvpn user
+  ansible.builtin.user:
+    name: openvpn
+    uid: "{{ firewall_openvpn_client_uid }}"
+    create_home: no
+    home: /nonexistent
+    group: openvpn
+    system: yes
+    shell: /usr/sbin/nologin
+    state: present
+  become: true
+
+- name: Create openvpn base directory
+  ansible.builtin.file:
+    path: "{{ firewall_openvpn_client_path }}"
+    state: directory
+    owner: root
+    group: wheel
+    mode: '0750'
+  become: true
+
+- name: Create openvpn client directories
+  ansible.builtin.file:
+    path: "{{ firewall_openvpn_client_path }}/{{ item.name }}"
+    state: directory
+    owner: openvpn
+    group: wheel
+    mode: '0750'
+  become: true
+  loop: "{{ firewall_openvpn_client_conf }}"
+  no_log: yes
+
+- name: Copy openvpn client tls keys
+  ansible.builtin.copy:
+    src: "{{ item.tls_key }}"
+    dest: "{{ firewall_openvpn_client_path }}/{{ item.name }}/tls-auth"
+    owner: openvpn
+    group: wheel
+    mode: '0600'
+  become: true
+  when: item.tls_key is defined
+  loop: "{{ firewall_openvpn_client_conf }}"
+  no_log: yes
+  notify: restart openvpn clients
+
+- name: Copy openvpn server ca certs
+  ansible.builtin.copy:
+    src: "{{ item.ca_cert }}"
+    dest: "{{ firewall_openvpn_client_path }}/{{ item.name }}/ca.crt"
+    owner: openvpn
+    group: wheel
+    mode: '0600'
+  become: true
+  when: item.ca_cert is defined
+  loop: "{{ firewall_openvpn_client_conf }}"
+  no_log: yes
+  notify: restart openvpn clients
+
+- name: Template credential files
+  ansible.builtin.template:
+    src: "usr/local/etc/openvpn/auth.j2"
+    dest: "{{ firewall_openvpn_client_path }}/{{ item.name }}/up"
+    owner: openvpn
+    group: wheel
+    mode: '0600'
+  become: true
+  loop: "{{ firewall_openvpn_client_conf }}"
+  no_log: yes
+  notify: restart openvpn clients
+
+- name: Template configuration files
+  ansible.builtin.template:
+    src: "usr/local/etc/openvpn/client_config.ovpn.j2"
+    dest: "{{ firewall_openvpn_client_path }}/{{ item.name }}/config.ovpn"
+    owner: openvpn
+    group: wheel
+    mode: '0640'
+  become: true
+  loop: "{{ firewall_openvpn_client_conf }}"
+  no_log: yes
+  notify: restart openvpn clients
+
+- name: Link to main startup script
+  ansible.builtin.file:
+    src: "/usr/local/etc/rc.d/openvpn"
+    dest: "/usr/local/etc/rc.d/openvpn_{{ item.name }}"
+    state: link
+  become: true
+  loop: "{{ firewall_openvpn_client_conf }}"
+  no_log: yes
+
+- name: Template the openvpn service file
+  ansible.builtin.template:
+    src: "etc/rc.conf.d/openvpn.j2"
+    dest: "/etc/rc.conf.d/openvpn_{{ item.name }}"
+    owner: root
+    group: wheel
+    mode: '0640'
+  become: true
+  loop: "{{ firewall_openvpn_client_conf }}"
+  no_log: yes
+
+- name: Start openvpn service
+  ansible.builtin.service:
+    name: "openvpn_{{ item.name }}"
+    state: started
+  become: true
+  loop: "{{ firewall_openvpn_client_conf }}"
+  no_log: yes

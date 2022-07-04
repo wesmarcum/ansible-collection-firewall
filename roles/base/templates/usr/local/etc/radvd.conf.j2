@@ -1,0 +1,32 @@
+# managed by ansible
+# generated for {{ ansible_fqdn }}
+
+{% for int in firewall_interfaces %}
+{%  if (not firewall_interfaces[int].external | default(false) | bool) and (firewall_interfaces[int].ipv6_address is defined) %}
+# {{ firewall_interfaces[int].name | default(int) }}
+interface {{ int }} {
+	AdvSendAdvert on;
+	MinRtrAdvInterval {{ firewall_radvd_min_interval }};
+	MaxRtrAdvInterval {{ firewall_radvd_max_interval }};
+	AdvLinkMTU {{ firewall_interfaces[int].mtu | default(1500) }};
+	AdvDefaultPreference medium;
+	AdvManagedFlag on;
+	AdvOtherConfigFlag on;
+	prefix {{ firewall_interfaces[int].ipv6_address | ansible.utils.ipaddr('network/prefix') }} {
+		DeprecatePrefix on;
+		AdvOnLink on;
+		AdvAutonomous on;
+		AdvValidLifetime 86400;
+		AdvPreferredLifetime 14400;
+	};
+	route ::/0 {
+		AdvRoutePreference medium;
+		RemoveRoute on;
+	};
+	RDNSS {{ firewall_interfaces[int].ipv6_address | ansible.utils.ipaddr('address') }} { };
+{%      if firewall_interfaces[int].domain is defined %}
+	DNSSL {{ firewall_interfaces[int].domain }} { };
+{%      endif %}
+};
+{%  endif %}
+{% endfor %}

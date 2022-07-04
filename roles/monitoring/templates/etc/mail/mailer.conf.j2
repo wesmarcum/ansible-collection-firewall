@@ -1,0 +1,16 @@
+# managed by ansible
+# generated for {{ ansible_fqdn }}
+
+# $FreeBSD$
+#
+# Execute the "real" sendmail program, named /usr/libexec/sendmail/sendmail
+#
+# If dma(8) is installed, an example mailer.conf that uses dma(8) instead can
+# can be found in /usr/share/examples/dma.
+#
+sendmail        /usr/local/sbin/ssmtp
+send-mail       /usr/local/sbin/ssmtp
+mailq           /usr/local/sbin/ssmtp
+newaliases      /usr/local/sbin/ssmtp
+hoststat        /usr/bin/true
+purgestat       /usr/bin/true

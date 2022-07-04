@@ -1,0 +1,106 @@
+---
+- name: Install common packages
+  ansible.builtin.package:
+    name: "{{ firewall_common_packages }}"
+    state: present
+  become: true
+
+# Dynamically set facts from variables.
+# This is used to get a list of dhcp enabled interfaces.
+- ansible.builtin.import_tasks: "tasks/setfacts.yml"
+  tags:
+    - always
+
+# Set up network interfaces and other rc files.
+- name: Set up networking
+  ansible.builtin.import_tasks: "tasks/rc.yml"
+  tags:
+    - base
+    - rc
+    - network
+    - routing
+
+- name: flush handlers
+  ansible.builtin.meta: flush_handlers
+
+# Enable pf and copy ruleset.
+- name: Enable pf
+  ansible.builtin.import_tasks: "tasks/pf.yml"
+  tags:
+    - base
+    - firewall
+    - pf
+
+- name: flush handlers
+  ansible.builtin.meta: flush_handlers
+
+# Enable geo ip blocking.
+- name: Enable geoip blocking
+  ansible.builtin.include_tasks:
+    file: "tasks/geoip.yml"
+    apply:
+      tags:
+        - base
+        - geoip
+  when: firewall_geoip_enable | bool
+  tags:
+    - base
+    - geoip
+
+# Disable geo ip blocking.
+- name: Disable geoip blocking
+  ansible.builtin.include_tasks:
+    file: "tasks/geoip_disable.yml"
+    apply:
+      tags:
+        - base
+        - geoip
+  when: firewall_geoip_enable | bool is false
+  tags:
+    - base
+    - geoip
+
+# Enable dhcp6c for ipv6 dhcp interfaces.
+- name: Enable dhcp6c
+  ansible.builtin.import_tasks: "tasks/dhcp6c.yml"
+  tags:
+    - base
+    - dhcp6c
+
+# Install radvd for ipv6 route advertisements.
+- name: Enable radvd
+  ansible.builtin.include_tasks:
+    file: "tasks/radvd.yml"
+    apply:
+      tags:
+        - base
+        - radvd
+  when: firewall_radvd_enable | bool
+  tags:
+    - base
+    - radvd
+
+# Disable radvd when firewall_radvd_enable is set to false.
+- name: Disable radvd
+  ansible.builtin.include_tasks:
+    file: "tasks/radvd_disable.yml"
+    apply:
+      tags:
+        - base
+        - radvd
+  when: firewall_radvd_enable | bool is false
+  tags:
+    - base
+    - radvd
+
+# Set cron to run freebsd-update.
+- name: Set cron to run freebsd-update
+  ansible.builtin.cron:
+    name: "freebsd-update"
+    minute: "{{ 59 | random(seed=ansible_hostname) }}"
+    hour: "{{ 5 | random(seed=ansible_hostname) }}"
+    job: "/usr/sbin/freebsd-update cron"
+    user: root
+  become: true
+  tags:
+    - base

@@ -1,0 +1,53 @@
+---
+- name: restart netoptions
+  ansible.builtin.service:
+    name: netoptions
+    state: restarted
+  become: true
+
+- name: restart networking
+  ansible.builtin.service:
+    name: netif
+    state: restarted
+  become: true
+
+- name: restart routing
+  ansible.builtin.service:
+    name: routing
+    state: restarted
+  become: true
+
+- name: restart dhclient
+  ansible.builtin.service:
+    name: dhclient
+    state: restarted
+    args: "{{ item }}"
+  become: true
+  loop: "{{ firewall_dhcp4_interfaces }}"
+
+- name: restart dhcp6c
+  ansible.builtin.service:
+    name: dhcp6c
+    state: restarted
+  become: true
+
+- name: restart openvpn clients
+  ansible.builtin.service:
+    name: "openvpn_{{ item.name }}"
+    state: restarted
+  become: true
+  loop: "{{ firewall_openvpn_client_conf }}"
+  when: firewall_openvpn_client_enable | default(false) | bool
+  no_log: yes
+
+- name: restart pf
+  ansible.builtin.service:
+    name: pf
+    state: restarted
+  become: true
+
+- name: restart radvd
+  ansible.builtin.service:
+    name: radvd
+    state: restarted
+  become: true

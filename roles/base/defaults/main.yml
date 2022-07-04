@@ -1,0 +1,92 @@
+---
+### System
+
+firewall_zfs_enable: true
+firewall_powerd_enable: true
+firewall_powerd_flags: ""
+
+### Packages
+
+firewall_common_packages:
+  - bind-tools
+  - curl
+  - dhcp6
+  - htop
+  - pftop
+  - python
+  - radvd
+  - sudo
+
+### Network / Routing
+
+# Set the hostname for the firewall.
+firewall_hostname: "fw.local"
+
+# Interface configuration; defined as a dictionary.  See documentation for example.
+firewall_interfaces: {}
+
+# Enable ipv4 routing.
+firewall_ipv4_gateway_enable: "YES"
+
+# Enable ipv6 routing.
+firewall_ipv6_gateway_enable: "YES"
+
+# Manually set ipv4 default route.
+firewall_ipv4_default_route: ""
+
+# Manually set ipv6 default route.
+firewall_ipv6_default_route: ""
+
+# List of static routes.
+firewall_static_routes: []
+
+### radvd
+
+firewall_radvd_enable: true
+
+# Group id for radvd user.
+firewall_radvd_gid: 991
+
+# User id for radvd user.
+firewall_radvd_uid: 991
+
+# RA advertisement intervals.
+firewall_radvd_min_interval: 5
+firewall_radvd_max_interval: 20
+
+### IPv6 prefix delegation.
+
+# Enable or disable IPv6 prefix delegation support.
+firewall_ipv6_pd_enable: false
+
+# Global list/dictionary of IPv6 prefix delegation IDs and attributes.  See README for details and examples.
+firewall_ipv6_pd_list: []
+
+### PF
+
+# Location for pf rules and logfile.
+firewall_pf_rules: "/etc/pf/pf.conf"
+firewall_pf_logfile: "/var/log/pflog"
+
+# Default global pf settings.
+firewall_pf_table_entries: 4000000
+firewall_pf_limit_states: 800000
+firewall_pf_src_nodes: 800000
+
+# Tables to copy for pf; these should be located in "files/etc/pf/tables".
+firewall_pf_tables: []
+
+### Geo IP
+
+# Enable or disable geoip blocking.
+firewall_geoip_enable: false
+
+# List of country codes for blocking.  Use a list ISO 3166 codes - https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes.
+firewall_geoip_country_codes: []
+
+# Include ipv6 prefixes and generate the corresponding table.
+firewall_geoip_include_ipv6: true
+
+# Locations of the generated tables for geoip blocking.
+firewall_geoip_ipv4_file: "/etc/pf/tables/geoip_blocks_ipv4"
+firewall_geoip_ipv6_file: "/etc/pf/tables/geoip_blocks_ipv6"

@@ -1,0 +1,143 @@
+---
+- name: Install monitoring packages
+  ansible.builtin.package:
+    name: "{{ firewall_monitoring_packages }}"
+    state: present
+  become: true
+
+- name: Enable coretemp at boot
+  ansible.builtin.lineinfile:
+    path: "/boot/loader.conf"
+    line: 'coretemp_load="YES"'
+    regexp: '^coretemp_load='
+  become: true
+
+- name: Configure vnstat
+  block:
+    - name: Create vnstat logfile
+      ansible.builtin.file:
+        path: "{{ firewall_monitoring_vnstat_logfile }}"
+        state: touch
+        owner: vnstat
+        group: wheel
+        mode: '0640'
+        modification_time: preserve
+        access_time: preserve
+      become: true
+      when: firewall_monitoring_vnstat_uselogging | int == 1
+
+    - name: Create vnstat db dir
+      ansible.builtin.file:
+        path: "{{ firewall_monitoring_vnstat_db_path }}"
+        state: directory
+        owner: vnstat
+        group: vnstat
+        mode: '0755'
+      become: true
+
+    - name: Template vnstat service file
+      ansible.builtin.template:
+        src: "etc/rc.conf.d/vnstat.j2"
+        dest: "/etc/rc.conf.d/vnstat"
+        owner: root
+        group: wheel
+        mode: '0640'
+      become: true
+
+    - name: Template vnstat configuration
+      ansible.builtin.template:
+        src: "usr/local/etc/vnstat.conf.j2"
+        dest: "{{ firewall_monitoring_vnstat_config }}"
+        owner: root
+        group: wheel
+        mode: '0644'
+      become: true
+      notify: restart vnstat
+
+    - name: Start vnstat
+      ansible.builtin.service:
+        name: vnstat
+        state: started
+      become: true
+
+    - name: Rotate logs for vnstat
+      ansible.builtin.blockinfile:
+        path: "/usr/local/etc/newsyslog.conf.d/vnstat.conf"
+        owner: root
+        group: wheel
+        mode: '0640'
+        create: yes
+        block: |
+          # configuration file for newsyslog (included by /etc/newsyslog.conf)
+          # logfilename        [owner:group]    mode    count    size    when    flags    [/pid_file]    [sig_num]
+          {{ firewall_monitoring_vnstat_logfile }}    vnstat:wheel    640    7    *    @T00    JB
+      become: true
+      notify: restart newsyslog
+      when: firewall_monitoring_vnstat_uselogging | int == 1
+  when: firewall_monitoring_vnstat_enable | bool
+
+- name: Configure email reports
+  block:
+    - name: Disable sendmail
+      ansible.builtin.blockinfile:
+        path: "/etc/rc.conf.d/sendmail"
+        owner: root
+        group: wheel
+        mode: '0640'
+        create: yes
+        block: |
+          # disable sendmail
+          sendmail_enable="NO"
+          sendmail_submit_enable="NO"
+          sendmail_outbound_enable="NO"
+          sendmail_msp_queue_enable="NO"
+      become: true
+
+    - name: Stop sendmail service
+      ansible.builtin.service:
+        name: sendmail
+        state: stopped
+      become: true
+
+    - name: Install ssmtp
+      ansible.builtin.package:
+        name: ssmtp
+        state: present
+      become: true
+
+    - name: Template ssmtp configuration
+      ansible.builtin.template:
+        src: "usr/local/etc/ssmtp/ssmtp.conf.j2"
+        dest: "{{ firewall_monitoring_ssmtp_path }}/ssmtp.conf"
+        owner: root
+        group: ssmtp
+        mode: '0640'
+      become: true
+
+    - name: Template mail aliases
+      ansible.builtin.template:
+        src: "usr/local/etc/ssmtp/revaliases.j2"
+        dest: "{{ firewall_monitoring_ssmtp_path }}/revaliases"
+        owner: root
+        group: ssmtp
+        mode: '0640'
+      become: true
+
+    - name: Template mailer configuration
+      ansible.builtin.template:
+        src: "etc/mail/mailer.conf.j2"
+        dest: "/etc/mail/mailer.conf"
+        owner: root
+        group: wheel
+        mode: '0644'
+      become: true
+
+    - name: Template periodic configuration
+      ansible.builtin.template:
+        src: "etc/periodic.conf.j2"
+        dest: "/etc/periodic.conf"
+        owner: root
+        group: wheel
+        mode: '0640'
+      become: true
+  when: firewall_monitoring_email_enable | bool

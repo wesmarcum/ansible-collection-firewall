@@ -1,0 +1,105 @@
+---
+- name: Create pf directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: wheel
+    mode: '0750'
+  become: true
+  loop:
+    - "/etc/pf"
+    - "/etc/pf/tables"
+
+- name: Template pf and pflog rc files
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: wheel
+    mode: '0640'
+  become: true
+  loop:
+    - { src: templates/etc/rc.conf.d/pf.j2, dest: /etc/rc.conf.d/pf }
+    - { src: templates/etc/rc.conf.d/pflog.j2, dest: /etc/rc.conf.d/pflog }
+
+- name: Copy pf reloader script
+  ansible.builtin.copy:
+    src: "files/usr/local/etc/rc.d/pf_reloader"
+    dest: "/usr/local/etc/rc.d/pf_reloader"
+    owner: root
+    group: wheel
+    mode: '0755'
+  become: true
+
+- name: Enable pf reloader
+  ansible.builtin.copy:
+    src: "files/etc/rc.conf.d/pf_reloader"
+    dest: "/etc/rc.conf.d/pf_reloader"
+    owner: root
+    group: wheel
+    mode: '0640'
+  become: true
+
+- name: Check for geoip ipv4 file
+  ansible.builtin.stat:
+    path: "{{ firewall_geoip_ipv4_file }}"
+  register: ipv4_file
+  become: true
+
+- name: Check for geoip ipv6 file
+  ansible.builtin.stat:
+    path: "{{ firewall_geoip_ipv6_file }}"
+  register: ipv6_file
+  become: true
+
+- name: Create geoip files
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: touch
+    owner: root
+    group: wheel
+    mode: '0640'
+  become: true
+  when: not ipv4_file.stat.exists or not ipv6_file.stat.exists
+  with_items:
+    - "{{ firewall_geoip_ipv4_file }}"
+    - "{{ firewall_geoip_ipv6_file }}"
+
+- name: Copy pf tables
+  ansible.builtin.copy:
+    src: "files/etc/pf/tables/{{ item }}"
+    dest: "/etc/pf/tables/{{ item }}"
+    owner: root
+    group: wheel
+    mode: '0640'
+  become: true
+  loop: "{{ firewall_pf_tables }}"
+  when: firewall_pf_tables | length > 0
+  notify:
+    - restart pf
+
+- name: Template pf rules
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "{{ firewall_pf_rules }}"
+    owner: root
+    group: wheel
+    mode: '0640'
+    backup: yes
+    validate: "pfctl -nf %s"
+  become: true
+  with_first_found:
+    - "templates/etc/pf/pf.conf_{{ ansible_hostname }}.j2"
+    - "templates/etc/pf/pf.conf_default.j2"
+  notify:
+    - restart pf
+
+- name: Start pf services
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: started
+  become: true
+  loop:
+    - pf
+    - pflog

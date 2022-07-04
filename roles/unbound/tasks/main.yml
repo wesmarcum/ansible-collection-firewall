@@ -1,0 +1,40 @@
+---
+# Install and configure unbound for a local resolver.
+- name: Enable Unbound
+  ansible.builtin.import_tasks: "tasks/unbound.yml"
+  when: firewall_unbound_enable | bool
+  tags:
+    - dns
+    - unbound
+
+- name: Disable Unbound
+  ansible.builtin.include_tasks:
+    file: "tasks/unbound_disable.yml"
+    apply:
+      tags:
+        - dns
+        - unbound
+  when: firewall_unbound_enable | bool is false
+  tags:
+    - dns
+    - unbound
+
+# Configure dynamic blocking (ads, malware) for unbound.
+- name: Enable dynamic blocking
+  ansible.builtin.import_tasks: "tasks/unbound_dynamic_block.yml"
+  when: firewall_unbound_dynamic_block | bool
+  tags:
+    - dns
+    - unbound
+
+- name: Disable dynamic blocking
+  ansible.builtin.include_tasks:
+    file: "tasks/unbound_dynamic_block_disable.yml"
+    apply:
+      tags:
+        - dns
+        - unbound
+  when: firewall_unbound_dynamic_block | bool is false
+  tags:
+    - dns
+    - unbound

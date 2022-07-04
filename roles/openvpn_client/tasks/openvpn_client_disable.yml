@@ -1,0 +1,56 @@
+---
+- name: Stop openvpn service
+  ansible.builtin.service:
+    name: "openvpn_{{ item.name }}"
+    state: stopped
+  become: true
+  loop: "{{ firewall_openvpn_client_conf }}"
+  no_log: yes
+
+- name: Uninstall openvpn package
+  ansible.builtin.package:
+    name: openvpn
+    state: absent
+  become: true
+
+- name: Remove openvpn group
+  ansible.builtin.group:
+    name: openvpn
+    gid: "{{ firewall_openvpn_client_gid }}"
+    system: yes
+    state: absent
+  become: true
+
+- name: Remove openvpn user
+  ansible.builtin.user:
+    name: openvpn
+    uid: "{{ firewall_openvpn_client_uid }}"
+    create_home: no
+    home: /nonexistent
+    group: openvpn
+    system: yes
+    shell: /usr/sbin/nologin
+    state: absent
+  become: true
+
+- name: Remove openvpn base directory
+  ansible.builtin.file:
+    path: "{{ firewall_openvpn_client_path }}"
+    state: absent
+  become: true
+
+- name: Remove link to main startup script
+  ansible.builtin.file:
+    path: "/usr/local/etc/rc.d/openvpn_{{ item.name }}"
+    state: absent
+  become: true
+  loop: "{{ firewall_openvpn_client_conf }}"
+  no_log: yes
+
+- name: Remove the openvpn service file
+  ansible.builtin.file:
+    path: "/etc/rc.conf.d/openvpn_{{ item.name }}"
+    state: absent
+  become: true
+  loop: "{{ firewall_openvpn_client_conf }}"
+  no_log: yes

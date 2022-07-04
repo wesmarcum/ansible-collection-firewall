@@ -1,0 +1,92 @@
+---
+- name: Install kea package
+  ansible.builtin.package:
+    name: kea
+    state: present
+  become: true
+
+- name: Create lease directory
+  ansible.builtin.file:
+    path: "{{ firewall_kea_lease_path }}"
+    state: directory
+    owner: root
+    group: wheel
+    mode: '0755'
+  become: true
+
+- name: Check for dhcp4 lease file
+  ansible.builtin.stat:
+    path: "{{ firewall_kea_lease_path }}/dhcp4.leases"
+  register: dhcp4_lease_file
+
+- name: Check for dhcp6 lease file
+  ansible.builtin.stat:
+    path: "{{ firewall_kea_lease_path }}/dhcp6.leases"
+  register: dhcp6_lease_file
+
+- name: Create dhcp4 lease file
+  ansible.builtin.file:
+    path: "{{ firewall_kea_lease_path }}/dhcp4.leases"
+    state: touch
+    owner: root
+    group: wheel
+    mode: '0644'
+  become: true
+  when: not dhcp4_lease_file.stat.exists
+  notify: reload kea
+
+- name: Create dhcp6 lease file
+  ansible.builtin.file:
+    path: "{{ firewall_kea_lease_path }}/dhcp6.leases"
+    state: touch
+    owner: root
+    group: wheel
+    mode: '0644'
+  become: true
+  when: not dhcp6_lease_file.stat.exists
+  notify: reload kea
+
+- name: Template keactrl.conf
+  ansible.builtin.template:
+    src: "usr/local/etc/kea/keactrl.conf.j2"
+    dest: "{{ firewall_kea_path }}/keactrl.conf"
+    owner: root
+    group: wheel
+    mode: '0644'
+  become: true
+  notify: restart kea
+
+- name: Template kea-dhcp4.conf
+  ansible.builtin.template:
+    src: "usr/local/etc/kea/kea-dhcp4.conf.j2"
+    dest: "{{ firewall_kea_path }}/kea-dhcp4.conf"
+    owner: root
+    group: wheel
+    mode: '0644'
+  become: true
+  notify: reload kea
+
+- name: Template kea-dhcp6.conf
+  ansible.builtin.template:
+    src: "usr/local/etc/kea/kea-dhcp6.conf.j2"
+    dest: "{{ firewall_kea_path }}/kea-dhcp6.conf"
+    owner: root
+    group: wheel
+    mode: '0644'
+  become: true
+  notify: reload kea
+
+- name: Template the kea service file
+  ansible.builtin.template:
+    src: "etc/rc.conf.d/kea.j2"
+    dest: "/etc/rc.conf.d/kea"
+    owner: root
+    group: wheel
+    mode: '0640'
+  become: true
+
+- name: Start the kea service
+  ansible.builtin.service:
+    name: kea
+    state: started
+  become: true

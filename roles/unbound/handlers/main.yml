@@ -1,0 +1,29 @@
+---
+- name: restart unbound
+  ansible.builtin.service:
+    name: unbound
+    state: restarted
+  become: true
+
+- name: reload unbound
+  ansible.builtin.command:
+    cmd: "/usr/local/sbin/unbound-control reload"
+  become: true
+
+- name: restart syslogd
+  ansible.builtin.service:
+    name: syslogd
+    state: restarted
+  become: true
+
+- name: restart newsyslog
+  ansible.builtin.service:
+    name: newsyslog
+    state: restarted
+  become: true
+
+- name: restart networking
+  ansible.builtin.service:
+    name: netif
+    state: restarted
+  become: true

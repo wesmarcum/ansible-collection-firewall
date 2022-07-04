@@ -1,0 +1,41 @@
+---
+### Openvpn client
+
+firewall_openvpn_client_enable: true
+
+# Base directory for openvpn configurations.
+firewall_openvpn_client_path: "/usr/local/etc/openvpn"
+
+# Group id for openvpn user.
+firewall_openvpn_client_gid: 990
+
+# User id for openvpn user.
+firewall_openvpn_client_uid: 990
+
+# List of dictionary values for openvpn client configuration.
+firewall_openvpn_client_conf: []
+
+# Set logging verbosity.
+firewall_openvpn_client_verbosity: 3
+
+# Drop privileges for client.  This can cause permissions issues if the tunnel ip/subnet changes.
+firewall_openvpn_client_drop_priv: false
+
+# Chroot openvpn process.  This can cause issues re-configuring the tunnel interface.
+firewall_openvpn_client_chroot: false
+
+# Script security level (0-3).
+firewall_openvpn_client_script_security: 1
+
+# Keepalive values.
+firewall_openvpn_client_keepalive_ping: 10
+firewall_openvpn_client_keepalive_ping_restart: 60
+
+# Connect retry - seconds to wait between connection attempts.
+firewall_openvpn_client_retry: 5
+
+# If hostname resolution fails, wait this number of seconds before failing.
+firewall_openvpn_client_resolv_retry: 30
+
+# Renegotiate the data channel after this number of seconds.
+firewall_openvpn_client_reneg: 3600

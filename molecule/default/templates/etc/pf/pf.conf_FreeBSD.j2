@@ -1,0 +1,120 @@
+# managed by ansible
+# generated for {{ ansible_fqdn }}
+
+### Macros / lists
+{# generate list of interface mappings #}
+{% for int, data in firewall_interfaces.items() %}
+{%  if data.name is defined %}
+{{ data.name }} = "{{ int }}"
+{%  endif %}
+{% endfor %}
+internal_int = "{ {% for int, data in firewall_interfaces.items() %}{% if (not data.external | default(false) | bool) and (data.name is defined) %}{{ int }} {% endif %}{% endfor %}}"
+
+web = "{ 80, 443 }"
+isakmp_nat_t = "{ 500, 4500 }"
+
+### Tables
+# private address space
+table <rfc1918> const { 10.0.0.0/8, 192.168.0.0/16, 172.16.0.0/12 }
+table <rfc4193> const { fc00::/7 }
+
+# always block these networks
+table <blocklist> persist { }
+
+{% if firewall_geoip_enable | bool %}
+# geoip blocks
+table <geoblock_ipv4> persist file "{{ firewall_geoip_ipv4_file }}"
+table <geoblock_ipv6> persist file "{{ firewall_geoip_ipv6_file }}"
+
+{% endif %}
+### Options
+set fingerprints "/etc/pf.os"
+set limit table-entries {{ firewall_pf_table_entries }}
+set optimization normal
+set limit states {{ firewall_pf_limit_states }}
+set limit src-nodes {{ firewall_pf_src_nodes }}
+# silently drop packets by default
+set block-policy drop
+
+### Traffic Normalization
+set skip on lo0
+scrub in all fragment reassemble max-mss 1440
+
+### Queueing
+
+### NAT
+nat on $outside inet from !($outside) to any -> ($outside)
+nat on $outside inet6 from !($outside) to any -> ($outside)
+
+### Filtering
+# default policy
+block in log all
+pass out all keep state
+antispoof quick for $outside
+
+# fw management
+pass in log quick on $internal_int proto tcp from any to (self) port 22 label "ssh to fw" keep state (max 10, source-track rule, max-src-conn 5, max-src-conn-rate 5 / 30)
+
+# icmp6 for ipv6 operation
+# See man icmp6(4)
+# 1    unreach         Destination unreachable
+# 2    toobig          Packet too big
+# 128  echoreq         Echo service request
+# 129  echorep         Echo service reply
+# 133  routersol       Router solicitation
+# 134  routeradv       Router advertisement
+# 135  neighbrsol      Neighbor solicitation
+# 136  neighbradv      Neighbor advertisement
+
+# pass any unreachable, toobig, NS, NA.
+pass log quick inet6 proto icmp6 from any to any icmp6-type {1,2,135,136} label "icmp6" keep state (max 100, source-track rule, max-src-states 10)
+pass in log quick inet6 proto icmp6 from fe80::/10 to fe80::/10 icmp6-type {128,133,134,135,136} keep state label "icmp6"
+pass in log quick inet6 proto icmp6 from ff02::/16 to fe80::/10 icmp6-type {128,133,134,135,136} keep state label "icmp6"
+pass in log quick inet6 proto icmp6 from fe80::/10 to ff02::/16 icmp6-type {128,133,134,135,136} keep state label "icmp6"
+pass in log quick inet6 proto icmp6 from :: to ff02::/16 icmp6-type {128,133,134,135,136} keep state label "icmp6"
+
+# icmp for ipv4
+# Num  Abbrev.         Description
+# 0    echorep         Echo reply
+# 3    unreach         Destination unreachable
+# 4    squench         Packet loss, slow down
+# 5    redir           Shorter route exists
+# 6    althost         Alternate host address
+# 8    echoreq         Echo request
+# 9    routeradv       Router advertisement
+# 10   routersol       Router solicitation
+# 11   timex           Time exceeded
+# pass any unreachable or time exceeded
+pass log inet proto icmp from any to any icmp-type { 3, 11 } label "icmp4" keep state (max 100, source-track rule, max-src-states 10)
+
+# fw services
+pass in quick on $internal_int proto udp from any to (self) port = 53 label "dns queries to fw"
+# dhcpv4
+pass in quick on $internal_int inet proto udp from any port = 68 to 255.255.255.255 port = 67 label "DHCPv4 server"
+pass in quick on $inside inet proto udp from any port = 68 to $inside:0 port = 67 label "DHCPv4 server"
+pass in quick on $outside inet proto udp from ($outside:network) port = 67 to ($outside:0) port = 68 label "DHCPv4 client"
+# dhcpv6
+pass in quick on $internal_int inet6 proto udp from fe80::/10 port = 546 to ff02::1:2/128 port = 547 label "DHCPv6 server"
+pass in quick on $outside inet6 proto udp from fe80::/10 to fe80::/10 port = 546 label "wan DHCPv6 client"
+pass in quick on $outside inet6 proto udp from fe80::/10 to ff02::/16 port = 546 label "wan DHCPv6 client"
+
+## interface rules
+
+# outside
+block in log quick on $outside inet from <rfc1918> to any label "block private networks"
+block in log quick on $outside from <blocklist> to any label "block networks from external"
+{% if firewall_geoip_enable | bool %}
+block in log quick on $outside inet from <geoblock_ipv4> to any label "block conns from geoblocked countries"
+block in log quick on $outside inet6 from <geoblock_ipv6> to any label "block conns from geoblocked countries"
+{% endif %}
+
+# inside
+pass in quick on $inside inet proto icmp from $inside:network to $inside:0 icmp-type echoreq label "icmp to fw"
+pass in quick on $inside inet6 proto icmp6 from $inside:network to $inside:0 icmp6-type echoreq label "icmp to fw"
+pass in quick on $inside proto udp from $inside:network to $inside:0 port 123 label "ntp to fw"
+{% if firewall_geoip_enable | bool %}
+block return in log quick on $inside inet from any to <geoblock_ipv4> label "outbound geoblock"
+block return in log quick on $inside inet6 from any to <geoblock_ipv6> label "outbound geoblock"
+{% endif %}
+pass in quick on $inside proto tcp from $inside:network to any port $web label "external web traffic"
+pass in quick on $inside proto udp from $inside:network to any port $web label "external web traffic"

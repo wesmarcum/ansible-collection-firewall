@@ -1,0 +1,6 @@
+---
+### Sanoid
+
+firewall_sanoid_enable: true
+firewall_sanoid_path: "/usr/local/etc/sanoid"
+firewall_sanoid_runtime_path: "/var/run/sanoid"

@@ -1,0 +1,23 @@
+#!/bin/sh
+# managed by ansible
+# generated for {{ ansible_fqdn }}
+
+url={{ firewall_unbound_dynamic_block_url }}
+include_ipv6=true
+unbound_path="/usr/local/etc/unbound"
+outfile="dynamic_block.conf"
+
+echo "server:" >> /tmp/dynblock-unbound
+curl -s $url | grep '^0\.0\.0\.0' | awk '{print "\tlocal-zone: \""$2"\" redirect\n\tlocal-data: \""$2" A 0.0.0.0\"\n"}' >> /tmp/dynblock-unbound
+
+if [ "$include_ipv6" = "true" ]; then
+  curl -s $url | grep '^0\.0\.0\.0' | awk '{print "\tlocal-data: \""$2" AAAA ::\"\n"}' >> /tmp/dynblock-unbound
+fi
+
+cp /tmp/dynblock-unbound "${unbound_path}/${outfile}"
+rm /tmp/dynblock-unbound
+chown unbound:wheel "${unbound_path}/${outfile}"
+chmod 0640 "${unbound_path}/${outfile}"
+
+# reload unbound conf
+/usr/local/sbin/unbound-control reload 2>&1 > /dev/null

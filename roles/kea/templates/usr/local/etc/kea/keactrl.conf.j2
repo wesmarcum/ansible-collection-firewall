@@ -1,0 +1,60 @@
+# managed by ansible
+# generated for {{ ansible_fqdn }}
+
+# This is a configuration file for keactrl script which controls
+# the startup, shutdown, reconfiguration and gathering the status
+# of the Kea's processes.
+
+# Note that control agent must be launched after servers and netconf last.
+
+# prefix holds the location where the Kea is installed.
+prefix=/usr/local
+
+# Location of Kea configuration files.
+kea_dhcp4_config_file=${prefix}/etc/kea/kea-dhcp4.conf
+kea_dhcp6_config_file=${prefix}/etc/kea/kea-dhcp6.conf
+kea_dhcp_ddns_config_file=${prefix}/etc/kea/kea-dhcp-ddns.conf
+kea_ctrl_agent_config_file=${prefix}/etc/kea/kea-ctrl-agent.conf
+kea_netconf_config_file=${prefix}/etc/kea/kea-netconf.conf
+
+# Location of Kea binaries.
+exec_prefix=${prefix}
+dhcp4_srv=${exec_prefix}/sbin/kea-dhcp4
+dhcp6_srv=${exec_prefix}/sbin/kea-dhcp6
+dhcp_ddns_srv=${exec_prefix}/sbin/kea-dhcp-ddns
+ctrl_agent_srv=${exec_prefix}/sbin/kea-ctrl-agent
+netconf_srv=${exec_prefix}/sbin/kea-netconf
+
+# Start DHCPv4 server?
+{% if firewall_kea_dhcp4_enable | bool %}
+dhcp4=yes
+{% else %}
+dhcp4=no
+{% endif %}
+
+# Start DHCPv6 server?
+{% if firewall_kea_dhcp6_enable | bool %}
+dhcp6=yes
+{% else %}
+dhcp6=no
+{% endif %}
+
+# Start DHCP DDNS server?
+{% if firewall_kea_ddns_enable | bool %}
+dhcp_ddns=yes
+{% else %}
+dhcp_ddns=no
+{% endif %}
+
+# Start Control Agent?
+{% if firewall_kea_ctrl_agent_enable | bool %}
+ctrl_agent=yes
+{% else %}
+ctrl_agent=no
+{% endif %}
+
+# Start Netconf?
+netconf=no
+
+# Be verbose?
+kea_verbose=no

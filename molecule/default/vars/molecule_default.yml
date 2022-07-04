@@ -1,0 +1,36 @@
+---
+firewall_hostname: "test.local"
+
+firewall_interfaces:
+  em0:
+    name: "mgmt"
+    ipv4_address: "dhcp"
+  em1:
+    name: "outside"
+    external: true
+    ipv4_address: "dhcp"
+    ipv6_address: "dhcp"
+    ipv6_cpe_wanif: true
+  em2:
+    name: "inside"
+    ipv4_address: "10.0.0.1/24"
+    ipv6_address: "fd0b:0000:0001::1/64"
+    domain: "inside.local"
+    mtu: 1500
+  em3:
+    state: up
+    vlans:
+      - 2
+      - 3
+  em3.2:
+    name: "guest"
+    ipv4_address: "10.100.0.1/24"
+    ipv6_address: "fd0b:0100:0001::1/64"
+    domain: "guest.local"
+    mtu: 1500
+  em3.3:
+    name: "lab"
+    ipv4_address: "10.100.1.1/24"
+    ipv6_address: "fd0b:0101:0001::1/64"
+    domain: "lab.local"
+    mtu: 1500

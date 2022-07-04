@@ -1,0 +1,21 @@
+---
+### Inadyn
+
+firewall_inadyn_enable: true
+firewall_inadyn_conf_file: "/usr/local/etc/inadyn.conf"
+
+# How often to check the external IP.
+firewall_inadyn_period: 300
+
+# Set a custom user agent string.  Defaults to inadyn/VERSION.
+firewall_inadyn_user_agent: ""
+
+# Set the external interface to track.  If not set, a check ip service is used.
+firewall_inadyn_interface: ""
+
+# Enable ipv6 / AAAA record updates.
+firewall_inadyn_allow_ipv6: true
+
+# List of dictionary values with inadyn configuration.  This list is for builtin providers.
+# See README.md and examples for details.
+firewall_inadyn_conf: []

@@ -1,0 +1,50 @@
+---
+- name: Stop the ntpd service
+  ansible.builtin.service:
+    name: ntpd
+    state: stopped
+  become: true
+
+- name: Disable mac_ntpd module
+  ansible.builtin.lineinfile:
+    path: "/boot/loader.conf"
+    regexp: '^mac_ntpd_load='
+    state: absent
+  become: true
+
+- name: Check for mac_ntpd module
+  ansible.builtin.command:
+    cmd: "/sbin/kldstat -m mac_ntpd"
+  register: ntpdmodule
+  changed_when: False
+  failed_when: False
+
+- name: Unload mac_ntpd module if found
+  ansible.builtin.command:
+    cmd: "/sbin/kldunload mac_ntpd"
+  when: '"mac_ntpd" in ntpdmodule.stdout'
+  become: true
+
+- name: Remove ntp log directory
+  ansible.builtin.file:
+    path: "{{ firewall_ntp_log_path }}"
+    state: absent
+  become: true
+
+- name: Remove ntp db directory
+  ansible.builtin.file:
+    path: "{{ firewall_ntp_db_path }}"
+    state: absent
+  become: true
+
+- name: Remove ntp.conf
+  ansible.builtin.file:
+    path: "{{ firewall_ntp_conf }}"
+    state: absent
+  become: true
+
+- name: Remove the ntpd service file
+  ansible.builtin.file:
+    path: "/etc/rc.conf.d/ntpd"
+    state: absent
+  become: true

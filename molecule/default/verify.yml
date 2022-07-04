@@ -1,0 +1,31 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  become: false
+
+  tasks:
+    - name: Run ifconfig
+      ansible.builtin.command:
+        cmd: /sbin/ifconfig
+      register: ifconfig_out
+
+    - name: Check IPv4/IPv6 addresses
+      ansible.builtin.assert:
+        that:
+          - "'10.0.0.1' in ifconfig_out.stdout"
+          - "'10.100.0.1' in ifconfig_out.stdout"
+          - "'10.100.1.1' in ifconfig_out.stdout"
+          - "'fd0b:0:1::1 prefixlen 64' in ifconfig_out.stdout"
+          - "'fd0b:100:1::1 prefixlen 64' in ifconfig_out.stdout"
+          - "'fd0b:101:1::1 prefixlen 64' in ifconfig_out.stdout"
+
+    - name: Verify services
+      service:
+        name: "{{ item }}"
+        state: started
+      become: true
+      loop:
+        - pf
+        - pflog
+        - dhcp6c

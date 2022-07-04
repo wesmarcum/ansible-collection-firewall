@@ -1,0 +1,84 @@
+---
+firewall_interfaces:
+  em0:
+    name: "outside"
+    external: true
+    ipv4_address: "dhcp"
+    ipv6_address: "dhcp"
+    ipv6_cpe_wanif: true
+  em1:
+    name: "inside"
+    ipv4_address: "10.0.0.1/24"
+    ipv6_address: "fd00:0001:0002::1/64"
+    domain: "lan.local"
+    mtu: 1500
+
+# Define a list of local zones and zone types.
+# DNSSEC will be disabled for these zones.
+firewall_unbound_local_zones:
+  - zone: lan.local.
+    type: nodefault
+
+# Define a list of local zones for reverse lookups.
+firewall_unbound_local_zones_rev:
+  - zone: "10.in-addr.arpa."
+  - zone: "d.f.ip6.arpa."
+
+# Disable DHCPv6.  SLAAC can be used instead.
+firewall_kea_dhcp6_enable: false
+
+# DHCPv4 configuration.
+firewall_kea_dhcp4_config:
+  Dhcp4:
+    # interfaces to activate for Kea
+    interfaces-config:
+      interfaces:
+        - em1
+      # dhcp socket type is 'raw' by default.  Change to 'udp' for relays.
+      dhcp-socket-type: raw
+  # control socket - uncomment if api is enabled
+  # control-socket:
+    # socket-type: unix
+    # socket-name: "/tmp/kea4-ctrl-socket"
+    lease-database:
+      type: memfile
+      persist: true
+      lfc-interval: 3600
+      name: /usr/local/var/lib/kea/dhcp4.leases
+    expired-leases-processing:
+      reclaim-timer-wait-time: 10
+      flush-reclaimed-timer-wait-time: 25
+      hold-reclaimed-time: 3600
+      max-reclaim-leases: 100
+      max-reclaim-time: 250
+      unwarned-reclaim-cycles: 5
+    # global timers
+    renew-timer: 10800
+    rebind-timer: 21600
+    valid-lifetime: 43200
+    max-valid-lifetime: 86400
+    min-valid-lifetime: 3600
+    # Pools
+    subnet4:
+      - subnet: 10.0.0.0/24
+        interface: em1
+        pools:
+          - pool: 10.0.0.100 - 10.0.0.200
+        option-data:
+          - name: routers
+            data: 10.0.0.1
+          - name: domain-name
+            data: lan.local
+          - name: domain-name-servers
+            data: 10.0.0.1
+    loggers:
+      - name: kea-dhcp4
+        output_options:
+          - output: /var/log/kea-dhcp4.log
+            pattern: |
+              {% raw %}%d{%j %H:%M:%S.%q} %c %m{% endraw %}
+            flush: true
+            maxsize: 10240000
+            maxver: 8
+        severity: INFO
+        debuglevel: 0

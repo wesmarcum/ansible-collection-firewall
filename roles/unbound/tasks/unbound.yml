@@ -1,0 +1,287 @@
+---
+- name: Install unbound
+  ansible.builtin.package:
+    name:
+      - unbound
+      - ca_root_nss
+    state: present
+  become: true
+
+- name: Create subdirectories for unbound
+  ansible.builtin.file:
+    path: "{{ firewall_unbound_path }}/{{ item }}"
+    owner: unbound
+    group: wheel
+    mode: '0750'
+    state: directory
+  become: true
+  with_items:
+    - cert
+
+- name: Template unbound config
+  ansible.builtin.template:
+    src: "usr/local/etc/unbound/unbound.conf.j2"
+    dest: "{{ firewall_unbound_path }}/unbound.conf"
+    owner: unbound
+    group: wheel
+    mode: '0640'
+    lstrip_blocks: yes
+    backup: yes
+  become: true
+  notify: restart unbound
+
+- name: Template unbound remote control config
+  ansible.builtin.template:
+    src: "usr/local/etc/unbound/remotecontrol.conf.j2"
+    dest: "{{ firewall_unbound_path }}/remotecontrol.conf"
+    owner: unbound
+    group: wheel
+    mode: '0640'
+  become: true
+  notify: reload unbound
+
+- name: Check for unbound server key
+  ansible.builtin.stat:
+    path: "{{ firewall_unbound_path }}/unbound_server.key"
+  register: server_key
+
+- name: Check for unbound control key
+  ansible.builtin.stat:
+    path: "{{ firewall_unbound_path }}/unbound_control.key"
+  register: control_key
+
+- name: Determine if keys need to be generated
+  ansible.builtin.set_fact:
+    unbound_gen_keys: true
+  when: (not server_key.stat.exists) or (not control_key.stat.exists)
+
+- name: Generate unbound control/server keys
+  ansible.builtin.command:
+    cmd: "/usr/local/sbin/unbound-control-setup"
+  become: true
+  when: unbound_gen_keys | default(false) | bool
+  notify: restart unbound
+
+- name: Set permissions on control keys
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    owner: unbound
+    group: wheel
+    mode: "{{ item.mode }}"
+  become: true
+  with_items:
+    - { path: "{{ firewall_unbound_path }}/unbound_control.key", mode: '0600' }
+    - { path: "{{ firewall_unbound_path }}/unbound_control.pem", mode: '0640' }
+    - { path: "{{ firewall_unbound_path }}/unbound_server.key", mode: '0600' }
+    - { path: "{{ firewall_unbound_path }}/unbound_server.pem", mode: '0640' }
+
+- name: Get root hints file
+  ansible.builtin.get_url:
+    url: "https://www.internic.net/domain/named.cache"
+    dest: "{{ firewall_unbound_path }}/root.hints"
+    force: yes
+    owner: unbound
+    group: wheel
+    mode: '0644'
+  become: true
+  notify: reload unbound
+
+- name: Set cron to update root hints
+  ansible.builtin.cron:
+    name: "Update root hints"
+    minute: "30"
+    hour: "0"
+    weekday: "0"
+    user: unbound
+    job: "curl -s --output {{ firewall_unbound_path }}/root.hints https://www.internic.net/domain/named.cache"
+  become: true
+
+- name: Create static blocklist
+  ansible.builtin.file:
+    path: "{{ firewall_unbound_path }}/static_block.conf"
+    state: touch
+    owner: unbound
+    group: wheel
+    mode: '0640'
+    modification_time: preserve
+    access_time: preserve
+  become: true
+
+- name: Check for local static blocklist
+  ansible.builtin.stat:
+    path: "files/usr/local/etc/unbound/static_block.conf"
+  delegate_to: localhost
+  register: static_block_local
+
+- name: Copy local static blocklist (if exists)
+  ansible.builtin.copy:
+    src: "files/usr/local/etc/unbound/static_block.conf"
+    dest: "{{ firewall_unbound_path }}/static_block.conf"
+    owner: unbound
+    group: wheel
+    mode: '0640'
+  become: true
+  when: static_block_local.stat.exists
+  notify: reload unbound
+
+- name: Create dynamic block file
+  ansible.builtin.file:
+    path: "{{ firewall_unbound_path }}/dynamic_block.conf"
+    state: touch
+    owner: unbound
+    group: wheel
+    mode: '0640'
+    modification_time: preserve
+    access_time: preserve
+  become: true
+  when: firewall_unbound_dynamic_block | bool
+
+- name: Template access_lists.conf
+  ansible.builtin.template:
+    src: "usr/local/etc/unbound/access_lists.conf.j2"
+    dest: "{{ firewall_unbound_path }}/access_lists.conf"
+    owner: unbound
+    group: wheel
+    mode: '0640'
+  become: true
+  notify: reload unbound
+
+- name: Template local_zone.conf
+  ansible.builtin.template:
+    src: "usr/local/etc/unbound/local_zone.conf.j2"
+    dest: "{{ firewall_unbound_path }}/local_zone.conf"
+    owner: unbound
+    group: wheel
+    mode: '0640'
+  become: true
+  when: firewall_unbound_local_zone_template | bool
+  notify: reload unbound
+
+- name: Copy local zone files
+  block:
+    - name: Check for local zone file
+      ansible.builtin.stat:
+        path: "files/usr/local/etc/unbound/local_zone.conf"
+      register: localzone
+
+    - name: Copy local zone file
+      ansible.builtin.copy:
+        src: "files/usr/local/etc/unbound/local_zone.conf"
+        dest: "{{ firewall_unbound_path }}/local_zone.conf"
+        owner: unbound
+        group: wheel
+        mode: '0640'
+      become: true
+      notify: reload unbound
+  when: not firewall_unbound_local_zone_template | bool
+
+- name: Template stub zones
+  ansible.builtin.template:
+    src: "usr/local/etc/unbound/stub_zone.conf.j2"
+    dest: "{{ firewall_unbound_path }}/stub_zone.conf"
+    owner: unbound
+    group: wheel
+    mode: '0640'
+  become: true
+  when: firewall_unbound_stub_zones | length > 0
+  notify: reload unbound
+
+- name: Template forward zones
+  ansible.builtin.template:
+    src: "usr/local/etc/unbound/forward_zone.conf.j2"
+    dest: "{{ firewall_unbound_path }}/forward_zone.conf"
+    owner: unbound
+    group: wheel
+    mode: '0640'
+    lstrip_blocks: yes
+  become: true
+  when: (firewall_unbound_forward_enable | bool) and (firewall_unbound_forward_zones | length > 0)
+  notify: reload unbound
+
+- name: Create unbound log file
+  ansible.builtin.file:
+    path: "/var/log/unbound.log"
+    state: touch
+    owner: unbound
+    group: wheel
+    mode: '0640'
+    modification_time: preserve
+    access_time: preserve
+  become: true
+  notify:
+    - reload unbound
+    - restart syslogd
+
+- name: Set syslog for unbound
+  ansible.builtin.blockinfile:
+    path: "/usr/local/etc/syslog.d/unbound.conf"
+    owner: root
+    group: wheel
+    mode: '0640'
+    create: yes
+    block: |
+      !unbound
+      *.*             /var/log/unbound.log
+  become: true
+  notify: restart syslogd
+
+- name: Modify /etc/syslog.conf
+  ansible.builtin.lineinfile:
+    path: "/etc/syslog.conf"
+    line: "!-unbound"
+    insertbefore: '^\*\.=debug'
+    regexp: '^\!-unbound'
+  become: true
+  notify: restart syslogd
+
+- name: Rotate logs for unbound
+  ansible.builtin.blockinfile:
+    path: "/usr/local/etc/newsyslog.conf.d/unbound.conf"
+    owner: root
+    group: wheel
+    mode: '0640'
+    create: yes
+    block: |
+      # configuration file for newsyslog (included by /etc/newsyslog.conf)
+      # logfilename        [owner:group]    mode    count    size    when    flags    [/pid_file]    [sig_num]
+      /var/log/unbound.log    unbound:wheel    640    7    *    @T00    JB
+  become: true
+  notify: restart newsyslog
+
+- name: Template unbound service file
+  ansible.builtin.template:
+    src: "etc/rc.conf.d/unbound.j2"
+    dest: "/etc/rc.conf.d/unbound"
+    owner: root
+    group: wheel
+    mode: '0640'
+  become: true
+
+- name: Start unbound
+  ansible.builtin.service:
+    name: unbound
+    state: started
+  become: true
+
+# Disable other programs updating resolv.conf.
+- name: Configure /etc/resolvconf.conf
+  ansible.builtin.lineinfile:
+    path: "/etc/resolvconf.conf"
+    create: yes
+    owner: root
+    group: wheel
+    mode: '0644'
+    state: present
+    regexp: '^resolvconf'
+    line: 'resolvconf=NO'
+  become: true
+
+# Set /etc/resolv.conf to point to localhost (unbound).
+- name: Template /etc/resolv.conf
+  ansible.builtin.template:
+    src: "etc/resolv.conf.j2"
+    dest: "/etc/resolv.conf"
+    owner: root
+    group: wheel
+    mode: '0644'
+  become: true

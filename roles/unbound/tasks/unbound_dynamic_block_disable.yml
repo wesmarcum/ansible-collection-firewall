@@ -1,0 +1,22 @@
+---
+- name: Remove dynamic block script
+  ansible.builtin.file:
+    path: "/usr/local/bin/dynamic_block.sh"
+    state: absent
+  become: true
+
+- name: Remove dynamic block file
+  ansible.builtin.file:
+    path: "{{ firewall_unbound_path }}/dynamic_block.conf"
+    state: absent
+  become: true
+
+- name: Remove cron job to update dynamic block list
+  ansible.builtin.cron:
+    name: "Update dynamic block list"
+    minute: "{{ 59 | random(seed=ansible_hostname) }}"
+    hour: "{{ range(20, 23, 1) | random(seed=ansible_hostname) }}"
+    user: unbound
+    job: "/usr/local/bin/dynamic_block.sh"
+    state: absent
+  become: true

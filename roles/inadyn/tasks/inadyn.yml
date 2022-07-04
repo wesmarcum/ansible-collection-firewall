@@ -1,0 +1,32 @@
+---
+- name: Install inadyn
+  ansible.builtin.package:
+    name: inadyn
+    state: present
+  become: true
+
+- name: Template inadyn config
+  ansible.builtin.template:
+    src: "usr/local/etc/inadyn.conf.j2"
+    dest: "{{ firewall_inadyn_conf_file }}"
+    owner: inadyn
+    group: inadyn
+    mode: '0640'
+    validate: "inadyn --check-config -f %s"
+  become: true
+  notify: restart inadyn
+
+- name: Template inadyn service file
+  ansible.builtin.template:
+    src: "etc/rc.conf.d/inadyn.j2"
+    dest: "/etc/rc.conf.d/inadyn"
+    owner: root
+    group: wheel
+    mode: '0640'
+  become: true
+
+- name: Start inadyn
+  ansible.builtin.service:
+    name: inadyn
+    state: started
+  become: true

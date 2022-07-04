@@ -1,0 +1,16 @@
+# managed by ansible
+# generated for {{ ansible_fqdn }}
+
+# Secret keys for TSIGs that secure zone transfers.
+# You could include: "secret.keys" and put the 'key:' statements in there,
+# and give that file special access control permissions.
+#
+key:
+    # The key name is sent to the other party, it must be the same
+    name: "nsdkey"
+    # algorithm hmac-md5, or sha1, sha256, sha224, sha384, sha512
+    algorithm: {{ firewall_nsd_secret_hash }}
+    # secret material, must be the same as the other party uses.
+    # base64 encoded random number.
+    # e.g. from dd if=/dev/random of=/dev/stdout count=1 bs=32 | base64
+    secret: "{{ firewall_nsd_secret }}"

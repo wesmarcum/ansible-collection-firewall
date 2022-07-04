@@ -1,0 +1,12 @@
+# managed by ansible
+# generated for {{ ansible_fqdn }}
+
+{% for int, data in firewall_interfaces.items() %}
+{%  if data.ipv6_cpe_wanif | default(false) | bool %}
+# Accept router advertisements on {{ int }} interface
+ipv6_cpe_wanif="{{ int }}"
+{%  endif %}
+{% endfor %}
+
+# Enable ipv6 slaac privacy extensions
+ipv6_privacy="YES"

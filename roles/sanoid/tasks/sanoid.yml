@@ -1,0 +1,65 @@
+---
+- name: Install sanoid
+  ansible.builtin.package:
+    name:
+      - sanoid
+      - flock
+    state: present
+  become: true
+
+- name: Create symlink for perl
+  ansible.builtin.file:
+    src: "/usr/local/bin/perl"
+    dest: "/usr/bin/perl"
+    owner: root
+    group: wheel
+    mode: '0755'
+    state: link
+  become: true
+
+- name: Create sanoid runtime directory
+  ansible.builtin.file:
+    path: "{{ firewall_sanoid_runtime_path }}"
+    owner: root
+    group: wheel
+    mode: '0750'
+    state: directory
+  become: true
+
+- name: Create sanoid lock files
+  ansible.builtin.file:
+    path: "{{ item }}"
+    owner: root
+    group: wheel
+    mode: '0644'
+    state: touch
+    modification_time: preserve
+    access_time: preserve
+  become: true
+  loop:
+    - "{{ firewall_sanoid_runtime_path }}/cron-prune.lock"
+    - "{{ firewall_sanoid_runtime_path }}/cron-take.lock"
+
+- name: Template sanoid config file
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "{{ firewall_sanoid_path }}/sanoid.conf"
+    owner: root
+    group: wheel
+    mode: '0644'
+  become: true
+  with_first_found:
+    - "usr/local/etc/sanoid/sanoid_{{ ansible_hostname }}.conf.j2"
+    - "usr/local/etc/sanoid/sanoid_default.conf.j2"
+
+- name: Set cron job for sanoid
+  ansible.builtin.blockinfile:
+    path: "/usr/local/etc/cron.d/sanoid"
+    create: yes
+    owner: root
+    group: wheel
+    mode: '0640'
+    block: |
+      */15 * * * * root flock -n /var/run/sanoid/cron-take.lock -c "sanoid --take-snapshots"
+      {{ 59 | random(start=1, seed=ansible_hostname) }} {{ 4 | random(seed=ansible_hostname) }} * * * root flock -n /var/run/sanoid/cron-prune.lock -c "sanoid --prune-snapshots"
+  become: true

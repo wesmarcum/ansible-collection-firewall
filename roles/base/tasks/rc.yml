@@ -1,0 +1,74 @@
+---
+- name: Template /etc/rc.conf
+  ansible.builtin.template:
+    src: "etc/rc.conf.j2"
+    dest: "/etc/rc.conf"
+    owner: root
+    group: wheel
+    mode: '0640'
+    backup: yes
+  become: true
+
+- name: Enable sshd
+  ansible.builtin.lineinfile:
+    path: "/etc/rc.conf.d/sshd"
+    create: yes
+    line: "sshd_enable=\"YES\""
+    state: present
+    owner: root
+    group: wheel
+    mode: '0640'
+  become: true
+
+- name: Set hostname
+  ansible.builtin.template:
+    src: "etc/rc.conf.d/hostname.j2"
+    dest: "/etc/rc.conf.d/hostname"
+    owner: root
+    group: wheel
+    mode: '0640'
+  become: true
+
+- name: Configure networking
+  ansible.builtin.template:
+    src: "etc/rc.conf.d/network.j2"
+    dest: "/etc/rc.conf.d/network"
+    owner: root
+    group: wheel
+    mode: '0640'
+    backup: yes
+  become: true
+  notify:
+    - restart networking
+    - restart routing
+    - restart dhcp6c
+    - restart dhclient
+    - restart openvpn clients
+
+- name: Set network options
+  ansible.builtin.template:
+    src: "etc/rc.conf.d/netoptions.j2"
+    dest: "/etc/rc.conf.d/netoptions"
+    owner: root
+    group: wheel
+    mode: '0640'
+  become: true
+  notify:
+    - restart networking
+    - restart netoptions
+    - restart routing
+    - restart dhcp6c
+    - restart dhclient
+
+- name: Set routing configuration
+  ansible.builtin.template:
+    src: "etc/rc.conf.d/routing.j2"
+    dest: "/etc/rc.conf.d/routing"
+    owner: root
+    group: wheel
+    mode: '0640'
+  become: true
+  notify:
+    - restart routing
+    - restart dhcp6c
+    - restart dhclient

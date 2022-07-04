@@ -1,0 +1,41 @@
+# managed by ansible
+# generated for {{ ansible_fqdn }}
+
+{% for int in firewall_dhcp6_interfaces %}
+interface {{ int }} {
+    send ia-na 0;    # request stateful address
+    {% if firewall_ipv6_pd_enable %}
+        {% if firewall_interfaces[int].ipv6_send_ia_pd is defined %}
+            {% if firewall_interfaces[int].ipv6_send_ia_pd is iterable %}
+                {% for pd in firewall_interfaces[int].ipv6_send_ia_pd %}
+    send ia-pd {{ pd }};    # request prefix delegation {{ pd }}
+                {% endfor %}
+            {% else %}
+    send ia-pd {{ firewall_interfaces[int].ipv6_send_ia_pd | string }};
+            {% endif %}
+        {% endif %}
+    {% endif %}
+    send rapid-commit;
+    request domain-name-servers;
+    request domain-name;
+};
+{% endfor %}
+
+id-assoc na 0 {
+};
+
+{% if firewall_ipv6_pd_enable and firewall_ipv6_pd_list | length > 0 %}
+{%  for pd in firewall_ipv6_pd_list %}
+id-assoc pd {{ pd.id }} {
+    prefix {{ pd.prefix_length | default("::/64") }} {{ pd.lifetime | default("infinity") }};
+    {% for int in firewall_interfaces %}
+        {% if (firewall_interfaces[int].ipv6_pd is defined) and (firewall_interfaces[int].ipv6_pd == pd.id) %}
+    prefix-interface {{ int }} {
+        sla-id {{ firewall_interfaces[int].ipv6_pd_sla_id | default(0) }};
+        sla-len {{ firewall_interfaces[int].ipv6_pd_sla_len | default(0) }};
+    };
+        {% endif %}
+    {% endfor %}
+};
+{%  endfor %}
+{% endif %}

@@ -1,0 +1,6 @@
+# managed by ansible
+# generated for {{ ansible_fqdn }}
+
+wireguard_enable="YES"
+wireguard_interfaces="{% for item in firewall_wireguard_conf %}{{ item.name }}{% if not loop.last %} {% endif %}{% endfor %}"
+wireguard_env="{{ firewall_wireguard_env }}"

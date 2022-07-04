@@ -1,0 +1,27 @@
+---
+### NTP
+
+firewall_ntp_enable: true
+firewall_ntp_conf: "/etc/ntp.conf"
+firewall_ntp_db_path: "/var/db/ntp"
+firewall_ntp_log_path: "/var/log/ntp"
+
+# List of interfaces to enable for the ntp server.
+firewall_ntp_interfaces: []
+
+# List of pools to query upstream.
+firewall_ntp_pools:
+  - 0.north-america.pool.ntp.org
+  - 1.north-america.pool.ntp.org
+
+# List of servers to query.
+firewall_ntp_servers: []
+
+# Options to apply for internal ntp clients.
+firewall_ntp_restrict_options: "kod limited nomodify nopeer notrap"
+
+# Additional networks to permit for ntp.  Internal networks for specified interfaces are always included.  This variable can be used for vpn/remote networks.
+firewall_ntp_permit_networks: []
+
+# Enabled detailed logging for ntp peers.
+firewall_ntp_stats_enable: false

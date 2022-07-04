@@ -1,0 +1,26 @@
+# managed by ansible
+# generated for {{ ansible_fqdn }}
+
+# Enable ipv6 routing
+ipv6_gateway_enable="{{ firewall_ipv6_gateway_enable | string }}"
+
+# Enable ipv4 routing
+gateway_enable="{{ firewall_ipv4_gateway_enable | string }}"
+
+{% if firewall_ipv4_default_route | length > 0 %}
+# IPv4 default route
+defaultrouter="{{ firewall_ipv4_default_route | ansible.utils.ipaddr('address') }}"
+
+{% endif %}
+{% if firewall_ipv6_default_route | length > 0 %}
+# IPv6 default route
+ipv6_defaultrouter="{{ firewall_ipv6_default_route | ansible.utils.ipaddr('address') }}"
+
+{% endif %}
+{% if firewall_static_routes | length > 0 %}
+# Static routes
+static_routes="{% for r in firewall_static_routes %}{{ r.name }}{% if not loop.last %} {% endif %}{%  endfor %}"
+{%  for r in firewall_static_routes %}
+route_{{ r.name }}="-net {{ r.network | ansible.utils.ipaddr('net') }} {{ r.next_hop | ansible.utils.ipaddr('address') }}"
+{%  endfor %}
+{% endif %}

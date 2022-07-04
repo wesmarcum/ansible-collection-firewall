@@ -1,0 +1,17 @@
+---
+# Enable wireguard.
+- name: Enable Wireguard
+  ansible.builtin.import_tasks: "tasks/wireguard.yml"
+  when: firewall_wireguard_enable | bool
+  tags:
+    - wireguard
+
+- name: Disable Wireguard
+  ansible.builtin.include_tasks:
+    file: "tasks/wireguard_disable.yml"
+    apply:
+      tags:
+        - wireguard
+  when: firewall_wireguard_enable | bool is false
+  tags:
+    - wireguard

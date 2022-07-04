@@ -1,0 +1,67 @@
+---
+- name: Install ipdbtools
+  ansible.builtin.package:
+    name: ipdbtools
+    state: present
+  become: true
+
+- name: Check for ipdb
+  ansible.builtin.find:
+    paths: "/usr/local/etc/ipdb/IPRanges"
+    file_type: file
+    patterns: "*.dat"
+  register: ipdb_result
+  become: true
+
+- name: Update ipdb (first run)
+  ansible.builtin.command:
+    cmd: "/usr/local/bin/ipdb-update.sh"
+  when: ipdb_result.matched | int == 0
+  become: true
+
+- name: Set cron to update ipdb
+  ansible.builtin.cron:
+    name: "Update geoip db"
+    minute: 0
+    hour: 1
+    weekday: 0
+    user: root
+    job: "/usr/local/bin/ipdb-update.sh"
+  become: true
+
+- name: Template geoip script
+  ansible.builtin.template:
+    src: "usr/local/bin/geoip_gen.sh.j2"
+    dest: "/usr/local/bin/geoip_gen.sh"
+    owner: root
+    group: wheel
+    mode: '0755'
+  become: true
+
+- name: Set cron to update geoip tables for pf
+  ansible.builtin.cron:
+    name: "Update geoip tables for pf"
+    minute: 0
+    hour: 2
+    weekday: 0
+    user: root
+    job: "/usr/local/bin/geoip_gen.sh"
+  become: true
+
+- name: Stat geoip ipv4 table
+  ansible.builtin.stat:
+    path: "{{ firewall_geoip_ipv4_file }}"
+  register: ipv4_file
+  become: true
+
+- name: Stat geoip ipv6 table
+  ansible.builtin.stat:
+    path: "{{ firewall_geoip_ipv6_file }}"
+  register: ipv6_file
+  become: true
+
+- name: Run geoip script if tables are empty
+  ansible.builtin.command:
+    cmd: /usr/local/bin/geoip_gen.sh
+  when: ipv4_file.stat.size == 0 or ipv6_file.stat.size == 0
+  become: true

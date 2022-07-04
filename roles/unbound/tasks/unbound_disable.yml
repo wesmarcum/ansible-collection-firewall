@@ -1,0 +1,74 @@
+---
+- name: Stop unbound
+  ansible.builtin.service:
+    name: unbound
+    state: stopped
+  become: true
+
+- name: Uninstall unbound
+  ansible.builtin.package:
+    name:
+      - unbound
+    state: absent
+  become: true
+
+- name: Remove unbound config directory
+  ansible.builtin.file:
+    path: "{{ firewall_unbound_path }}"
+    state: absent
+  become: true
+
+- name: Remove cron job to update root hints
+  ansible.builtin.cron:
+    name: "Update root hints"
+    minute: "30"
+    hour: "0"
+    weekday: "0"
+    user: unbound
+    job: "curl -s --output {{ firewall_unbound_path }}/root.hints https://www.internic.net/domain/named.cache"
+    state: absent
+  become: true
+
+- name: Remove unbound log file
+  ansible.builtin.file:
+    path: "/var/log/unbound.log"
+    state: absent
+  become: true
+
+- name: Remove syslog for unbound
+  ansible.builtin.file:
+    path: "/usr/local/etc/syslog.d/unbound.conf"
+    state: absent
+  become: true
+  notify: restart syslogd
+
+- name: Modify /etc/syslog.conf
+  ansible.builtin.lineinfile:
+    path: "/etc/syslog.conf"
+    regexp: '^\!-unbound'
+    state: absent
+  become: true
+  notify: restart syslogd
+
+- name: Remove newsyslog config for unbound
+  ansible.builtin.file:
+    path: "/usr/local/etc/newsyslog.conf.d/unbound.conf"
+    state: absent
+  become: true
+  notify: restart newsyslog
+
+- name: Remove unbound service file
+  ansible.builtin.file:
+    path: "/etc/rc.conf.d/unbound"
+    state: absent
+  become: true
+
+# Permit other processes (DHCP) to modify resolv.conf.
+- name: Configure /etc/resolvconf.conf
+  ansible.builtin.lineinfile:
+    path: "/etc/resolvconf.conf"
+    regexp: '^resolvconf=NO'
+    state: absent
+  become: true
+  notify:
+    - restart networking

@@ -1,0 +1,16 @@
+---
+galaxy_info:
+  role_name: nsd
+  namespace: wesmarcum
+  author: Wes Marcum
+  description: This role builds an authoritative DNS resolver with NSD.
+  license: MIT
+  min_ansible_version: 2.9
+  platforms:
+    - name: FreeBSD
+      versions:
+        - all
+  galaxy_tags:
+    - freebsd
+    - nsd
+  dependencies: []

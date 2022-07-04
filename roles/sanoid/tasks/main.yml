@@ -1,0 +1,17 @@
+---
+# Enable sanoid for automated snapshot management.
+- name: Enable sanoid
+  ansible.builtin.import_tasks: "tasks/sanoid.yml"
+  when: firewall_sanoid_enable | bool
+  tags:
+    - sanoid
+
+- name: Disable sanoid
+  ansible.builtin.include_tasks:
+    file: "tasks/sanoid_disable.yml"
+    apply:
+      tags:
+        - sanoid
+  when: firewall_sanoid_enable | bool is false
+  tags:
+    - sanoid

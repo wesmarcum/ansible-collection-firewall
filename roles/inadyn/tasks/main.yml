@@ -1,0 +1,21 @@
+---
+# inadyn - dynamic dns update
+- name: Enable inadyn
+  ansible.builtin.import_tasks: "tasks/inadyn.yml"
+  when: firewall_inadyn_enable | bool
+  tags:
+    - dyndns
+    - inadyn
+
+# Disable inadyn
+- name: Disable inadyn
+  ansible.builtin.include_tasks:
+    file: "tasks/inadyn_disable.yml"
+    apply:
+      tags:
+        - dyndns
+        - inadyn
+  when: firewall_inadyn_enable | bool is false
+  tags:
+    - dyndns
+    - inadyn

@@ -1,0 +1,17 @@
+---
+galaxy_info:
+  role_name: base
+  namespace: wesmarcum
+  author: Wes Marcum
+  description: Base role for the firewall collection.  Sets interface addressing, routing, IP options.
+  license: MIT
+  min_ansible_version: 2.9
+  platforms:
+    - name: FreeBSD
+      versions:
+        - all
+  galaxy_tags:
+    - freebsd
+    - pf
+    - firewall
+  dependencies: []

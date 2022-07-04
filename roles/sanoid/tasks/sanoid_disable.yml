@@ -1,0 +1,25 @@
+---
+- name: Uninstall sanoid
+  ansible.builtin.package:
+    name:
+      - sanoid
+    state: absent
+  become: true
+
+- name: Remove sanoid runtime directory
+  ansible.builtin.file:
+    path: "{{ firewall_sanoid_runtime_path }}"
+    state: absent
+  become: true
+
+- name: Remove sanoid config directory
+  ansible.builtin.file:
+    path: "{{ firewall_sanoid_path }}"
+    state: absent
+  become: true
+
+- name: Remove cron job for sanoid
+  ansible.builtin.file:
+    path: "/usr/local/etc/cron.d/sanoid"
+    state: absent
+  become: true

@@ -1,0 +1,28 @@
+---
+- name: Template dhcp6c configuration
+  ansible.builtin.template:
+    src: "templates/usr/local/etc/dhcp6c.conf.j2"
+    dest: "/usr/local/etc/dhcp6c.conf"
+    owner: root
+    group: wheel
+    mode: '0644'
+    lstrip_blocks: yes
+    backup: yes
+  become: true
+  notify: restart dhcp6c
+
+- name: Template dhcp6c service configuration
+  ansible.builtin.template:
+    src: "templates/etc/rc.conf.d/dhcp6c.j2"
+    dest: "/etc/rc.conf.d/dhcp6c"
+    owner: root
+    group: wheel
+    mode: '0640'
+  become: true
+  notify: restart dhcp6c
+
+- name: Start dhcp6c
+  ansible.builtin.service:
+    name: dhcp6c
+    state: started
+  become: true

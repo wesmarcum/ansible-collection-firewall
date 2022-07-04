@@ -1,0 +1,15 @@
+---
+- name: Converge
+  hosts: all
+  become: false
+  vars_files:
+    - vars/molecule_default.yml
+
+  pre_tasks:
+    - name: Print ansible_facts
+      ansible.builtin.debug:
+        var: ansible_facts
+        verbosity: 2
+
+  roles:
+    - wesmarcum.firewall.base

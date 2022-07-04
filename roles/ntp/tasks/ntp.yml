@@ -1,0 +1,64 @@
+---
+# Enable mac_ntpd module.  This allows ntpd to run as a standard user
+- name: Enable mac_ntpd module at boot
+  ansible.builtin.lineinfile:
+    path: "/boot/loader.conf"
+    line: 'mac_ntpd_load="YES"'
+    regexp: '^mac_ntpd_load='
+  become: true
+
+- name: Check for mac_ntpd module
+  ansible.builtin.command:
+    cmd: "/sbin/kldstat -m mac_ntpd"
+  register: ntpdmodule
+  changed_when: False
+  failed_when: False
+
+- name: Load mac_ntpd module if not found
+  ansible.builtin.command:
+    cmd: "/sbin/kldload mac_ntpd"
+  when: '"No such file or directory" in ntpdmodule.stderr'
+  become: true
+
+- name: Create ntp log directory
+  ansible.builtin.file:
+    path: "{{ firewall_ntp_log_path }}"
+    state: directory
+    owner: ntpd
+    group: wheel
+    mode: '0750'
+  become: true
+
+- name: Create ntp db directory
+  ansible.builtin.file:
+    path: "{{ firewall_ntp_db_path }}"
+    state: directory
+    owner: ntpd
+    group: ntpd
+    mode: '0755'
+  become: true
+
+- name: Template ntp.conf
+  ansible.builtin.template:
+    src: "etc/ntp.conf.j2"
+    dest: "{{ firewall_ntp_conf }}"
+    owner: root
+    group: wheel
+    mode: '0644'
+  become: true
+  notify: restart ntpd
+
+- name: Template the ntpd service file
+  ansible.builtin.template:
+    src: "etc/rc.conf.d/ntpd.j2"
+    dest: "/etc/rc.conf.d/ntpd"
+    owner: root
+    group: wheel
+    mode: '0640'
+  become: true
+
+- name: Start the ntpd service
+  ansible.builtin.service:
+    name: ntpd
+    state: started
+  become: true

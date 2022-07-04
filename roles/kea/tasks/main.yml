@@ -1,0 +1,21 @@
+---
+# Install and configure kea for dhcpv4/dhcpv6.
+- name: Enable kea
+  ansible.builtin.import_tasks: "tasks/kea.yml"
+  when: firewall_kea_enable | bool
+  tags:
+    - dhcp
+    - kea
+
+# Disable kea.
+- name: Disable kea
+  ansible.builtin.include_tasks:
+    file: "tasks/kea_disable.yml"
+    apply:
+      tags:
+        - dhcp
+        - kea
+  when: firewall_kea_enable | bool is false
+  tags:
+    - dhcp
+    - kea

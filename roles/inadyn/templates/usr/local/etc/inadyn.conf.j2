@@ -1,0 +1,63 @@
+# managed by ansible
+# generated for {{ ansible_fqdn }}
+
+# How often to check the external IP
+period = {{ firewall_inadyn_period }}
+
+{% if firewall_inadyn_user_agent | length %}
+# Custom HTTP user agent, some DDNS providers require this.
+# Default is inadyn/VERSION, you rarely need this.
+user-agent = {{ firewall_inadyn_user_agent }}
+
+{% endif %}
+{% if firewall_inadyn_interface | length %}
+# Set interface to check for IP, default is to ask an external
+# checkip server.
+iface = {{ firewall_inadyn_interface }}
+
+{% endif %}
+{% if firewall_inadyn_allow_ipv6 | bool %}
+# Enable ipv6
+allow-ipv6 = true
+
+{% endif %}
+{# process list of inadyn providers #}
+{% if firewall_inadyn_conf | length %}
+{%  for item in firewall_inadyn_conf %}
+{{ item.type | default("provider") }} {{ item.name }} {
+  ssl = {{ item.ssl | default(true) | lower }}
+{%      if item.checkip_server is defined %}
+  checkip-server = {{ item.checkip_server }}
+{%      endif %}
+{%      if item.checkip_path is defined %}
+  checkip-path = {{ item.checkip_path }}
+{%      endif %}
+  checkip-ssl = {{ item.checkip_ssl | default(true) | lower }}
+  username = {{ item.username }}
+  password = {{ item.password }}
+  hostname = {{ item.hostname }}
+{%      if item.ttl is defined %}
+  ttl = {{ item.ttl }}
+{%      endif %}
+{%      if item.proxied is defined %}
+  proxied = {{ item.proxied | lower }}
+{%      endif %}
+{%      if item.ddns_server is defined %}
+  ddns-server = {{ item.ddns_server }}
+{%      endif %}
+{%      if item.ddns_path is defined %}
+  ddns-path = {{ item.ddns_path }}
+{%      endif %}
+{%      if item.ddns_response is defined %}
+  ddns-response = {{ item.ddns_response }}
+{%      endif %}
+{%      if item.user_agent is defined %}
+  user-agent = {{ item.user_agent }}
+{%      endif %}
+{%      if item.checkip_command is defined %}
+  checkip-command = "{{ item.checkip_command | string }}"
+{%      endif %}
+}
+
+{%  endfor %}
+{% endif %}

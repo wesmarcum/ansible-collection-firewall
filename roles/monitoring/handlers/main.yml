@@ -1,0 +1,12 @@
+---
+- name: restart vnstat
+  ansible.builtin.service:
+    name: vnstat
+    state: restarted
+  become: true
+
+- name: restart newsyslog
+  ansible.builtin.service:
+    name: newsyslog
+    state: restarted
+  become: true

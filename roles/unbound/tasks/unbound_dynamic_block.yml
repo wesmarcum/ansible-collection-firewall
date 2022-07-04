@@ -1,0 +1,30 @@
+---
+- name: Template dynamic block script
+  ansible.builtin.template:
+    src: "usr/local/bin/dynamic_block.sh.j2"
+    dest: "/usr/local/bin/dynamic_block.sh"
+    owner: root
+    group: wheel
+    mode: '0755'
+  become: true
+
+- name: Check dynamic block file
+  ansible.builtin.stat:
+    path: "{{ firewall_unbound_path }}/dynamic_block.conf"
+  register: dynamic_block
+
+- name: Run dynamic block script
+  ansible.builtin.command:
+    cmd: "/usr/local/bin/dynamic_block.sh"
+  when: not dynamic_block.stat.exists or dynamic_block.stat.size | int < 10
+  become: true
+  notify: reload unbound
+
+- name: Set cron to update dynamic block list
+  ansible.builtin.cron:
+    name: "Update dynamic block list"
+    minute: "{{ 59 | random(seed=ansible_hostname) }}"
+    hour: "{{ range(20, 23, 1) | random(seed=ansible_hostname) }}"
+    user: unbound
+    job: "/usr/local/bin/dynamic_block.sh"
+  become: true

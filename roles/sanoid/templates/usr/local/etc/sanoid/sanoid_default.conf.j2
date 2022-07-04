@@ -1,0 +1,30 @@
+# managed by ansible
+# generated for {{ ansible_fqdn }}
+
+[zroot]
+    use_template = standard
+    recursive = yes
+
+[zroot/var/log]
+    use_template = short
+    recursive = yes
+
+[template_standard]
+    frequently = 0
+    hourly = 0
+    daily = 30
+    weekly = 5
+    monthly = 0
+    yearly = 0
+    autosnap = yes
+    autoprune = yes
+
+[template_short]
+    frequently = 0
+    hourly = 0
+    daily = 14
+    weekly = 0
+    monthly = 0
+    yearly = 0
+    autosnap = yes
+    autoprune = yes

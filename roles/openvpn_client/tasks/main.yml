@@ -1,0 +1,17 @@
+---
+# Enable openvpn client.
+- name: Enable openvpn_client
+  ansible.builtin.import_tasks: "tasks/openvpn_client.yml"
+  when: firewall_openvpn_client_enable | bool
+  tags:
+    - openvpn_client
+
+- name: Disable openvpn_client
+  ansible.builtin.include_tasks:
+    file: "tasks/openvpn_client_disable.yml"
+    apply:
+      tags:
+        - openvpn_client
+  when: firewall_openvpn_client_enable | bool is false
+  tags:
+    - openvpn_client

@@ -1,0 +1,24 @@
+---
+- name: Prepare
+  hosts: all
+  gather_facts: false
+  become: false
+
+  tasks:
+    - name: Check for Python
+      ansible.builtin.raw: test -e /usr/local/bin/python
+      changed_when: false
+      failed_when: false
+      register: check_python
+      become: true
+
+    - name: Install python
+      ansible.builtin.raw: "pkg install -y python"
+      when: check_python.rc != 0
+      become: true
+
+    - name: Install sudo
+      ansible.builtin.package:
+        name: sudo
+        state: present
+      become: true

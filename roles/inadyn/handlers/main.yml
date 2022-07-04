@@ -1,0 +1,6 @@
+---
+- name: restart inadyn
+  ansible.builtin.service:
+    name: inadyn
+    state: restarted
+  become: true

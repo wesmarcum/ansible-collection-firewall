@@ -1,0 +1,17 @@
+---
+# Configure the ntp server.
+- name: Enable NTP
+  ansible.builtin.import_tasks: "tasks/ntp.yml"
+  when: firewall_ntp_enable | bool
+  tags:
+    - ntp
+
+- name: Disable NTP
+  ansible.builtin.include_tasks:
+    file: "tasks/ntp_disable.yml"
+    apply:
+      tags:
+        - ntp
+  when: firewall_ntp_enable | bool is false
+  tags:
+    - ntp

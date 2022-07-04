@@ -1,0 +1,16 @@
+---
+galaxy_info:
+  role_name: openvpn_client
+  namespace: wesmarcum
+  author: Wes Marcum
+  description: This role installs and configures OpenVPN and one or more client configurations.
+  license: MIT
+  min_ansible_version: 2.9
+  platforms:
+    - name: FreeBSD
+      versions:
+        - all
+  galaxy_tags:
+    - freebsd
+    - openvpn
+  dependencies: []

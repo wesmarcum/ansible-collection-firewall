@@ -1,0 +1,11 @@
+# managed by ansible
+# generated for {{ ansible_fqdn }}
+
+{% for zone in firewall_nsd_zones %}
+zone:
+    name: "{{ zone.name }}"
+    zonefile: "zones/{{ zone.zonefile }}"
+{%  if not loop.last %}
+
+{%  endif %}
+{% endfor %}

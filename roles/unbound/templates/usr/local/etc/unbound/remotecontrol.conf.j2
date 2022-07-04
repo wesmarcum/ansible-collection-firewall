@@ -1,0 +1,11 @@
+# managed by ansible
+# generated for {{ ansible_fqdn }}
+
+remote-control:
+	control-enable: yes
+	control-interface: 127.0.0.1
+	control-port: 953
+	server-key-file: "{{ firewall_unbound_path }}/unbound_server.key"
+	server-cert-file: "{{ firewall_unbound_path }}/unbound_server.pem"
+	control-key-file: "{{ firewall_unbound_path }}/unbound_control.key"
+	control-cert-file: "{{ firewall_unbound_path }}/unbound_control.pem"
