@@ -147,7 +147,7 @@ firewall_kea_dhcp4_config:
     # Pools
     subnet4:
       - subnet: 10.0.0.0/24
-        interface: em1.1
+        interface: em1
         pools:
           - pool: 10.0.0.100 - 10.0.0.200
         option-data:
