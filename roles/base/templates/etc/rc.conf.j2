@@ -18,4 +18,10 @@ zfs_enable="YES"
 # Enable powerd cpu scaling
 powerd_enable="YES"
 powerd_flags="{{ firewall_powerd_flags }}"
+
+{% endif %}
+{% if firewall_microcode_updates_enable | bool %}
+# Microcode updates
+microcode_update_enable="YES"
+
 {% endif %}

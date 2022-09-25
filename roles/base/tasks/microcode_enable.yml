@@ -1,0 +1,14 @@
+---
+# Install devcpu-data for microcode updates
+- name: Install devcpu-data for microcode updates
+  ansible.builtin.package:
+    name: devcpu-data
+    state: present
+  become: true
+
+- name: Start the microcode update service
+  ansible.builtin.service:
+    name: microcode_update
+    state: started
+  become: true
+  changed_when: false

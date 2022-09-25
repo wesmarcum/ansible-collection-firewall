@@ -104,3 +104,29 @@
   become: true
   tags:
     - base
+
+# Enable microcode updates
+- name: Enable microcode updates
+  ansible.builtin.include_tasks:
+    file: "tasks/microcode_enable.yml"
+    apply:
+      tags:
+        - base
+        - microcode
+  when: firewall_microcode_updates_enable | bool
+  tags:
+    - base
+    - microcode
+
+# Enable microcode updates
+- name: Disable microcode updates
+  ansible.builtin.include_tasks:
+    file: "tasks/microcode_disable.yml"
+    apply:
+      tags:
+        - base
+        - microcode
+  when: firewall_microcode_updates_enable | bool is false
+  tags:
+    - base
+    - microcode

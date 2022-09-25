@@ -1,0 +1,14 @@
+---
+- name: Stop the microcode update service
+  ansible.builtin.service:
+    name: microcode_update
+    state: stopped
+  become: true
+
+# Uninstall devcpu-data
+- name: Remove devcpu-data
+  ansible.builtin.package:
+    name: devcpu-data
+    state: absent
+  become: true
+

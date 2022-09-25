@@ -5,6 +5,9 @@ firewall_zfs_enable: true
 firewall_powerd_enable: true
 firewall_powerd_flags: ""
 
+# Enable microcode updates for physical hardware.
+firewall_microcode_updates_enable: false
+
 ### Packages
 
 firewall_common_packages:

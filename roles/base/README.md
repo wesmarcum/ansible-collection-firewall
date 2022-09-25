@@ -35,12 +35,13 @@ Role Variables
 
 #### General:
 
-| Variable Name            | Default Value         | Description                              |
-|--------------------------|-----------------------|------------------------------------------|
-| firewall_zfs_enable      | true                  | Enable zfs in rc.conf.                   |
-| firewall_powerd_enable   | true                  | Enable powerd for cpu frequency scaling. |
-| firewall_powerd_flags    | empty                 | Flags for powerd at startup.             |
-| firewall_common_packages | see defaults/main.yml | Packages to install for base.            |
+| Variable Name                     | Default Value         | Description                              |
+|-----------------------------------|-----------------------|------------------------------------------|
+| firewall_zfs_enable               | true                  | Enable zfs in rc.conf.                   |
+| firewall_powerd_enable            | true                  | Enable powerd for cpu frequency scaling. |
+| firewall_powerd_flags             | empty                 | Flags for powerd at startup.             |
+| firewall_microcode_updates_enable | false                 | Update microcode for intel/amd CPUs.     |
+| firewall_common_packages          | see defaults/main.yml | Packages to install for base.            |
 
 #### Network / Routing:
 
