@@ -25,3 +25,8 @@ powerd_flags="{{ firewall_powerd_flags }}"
 microcode_update_enable="YES"
 
 {% endif %}
+{% if firewall_smartd_enable | bool %}
+# Smartd disk monitoring
+smartd_enable="YES"
+
+{% endif %}

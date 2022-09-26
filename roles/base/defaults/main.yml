@@ -4,6 +4,8 @@
 firewall_zfs_enable: true
 firewall_powerd_enable: true
 firewall_powerd_flags: ""
+firewall_smartd_enable: false
+firewall_smartd_email: "root"
 
 # Enable microcode updates for physical hardware.
 firewall_microcode_updates_enable: false
@@ -12,6 +14,7 @@ firewall_microcode_updates_enable: false
 
 firewall_common_packages:
   - bind-tools
+  - smartmontools
   - curl
   - dhcp6
   - htop

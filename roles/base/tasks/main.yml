@@ -4,6 +4,8 @@
     name: "{{ firewall_common_packages }}"
     state: present
   become: true
+  tags:
+    - base
 
 # Dynamically set facts from variables.
 # This is used to get a list of dhcp enabled interfaces.
@@ -130,3 +132,26 @@
   tags:
     - base
     - microcode
+
+# Template the smartd configuration
+- name: Template smartd configuration
+  ansible.builtin.template:
+    src: "templates/usr/local/etc/smartd.conf.j2"
+    dest: "/usr/local/etc/smartd.conf"
+    owner: root
+    group: wheel
+    mode: 0644
+  become: true
+  when: firewall_smartd_enable | bool
+  tags:
+    - base
+
+# Start the smartd service
+- name: Start the smartd service
+  ansible.builtin.service:
+    name: smartd
+    state: started
+  become: true
+  when: firewall_smartd_enable | bool
+  tags:
+    - base
