@@ -4,12 +4,12 @@
 
 - name: Get ipv4 dhcp interfaces
   ansible.builtin.set_fact:
-    firewall_dhcp4_interfaces: "{{ firewall_dhcp4_interfaces | default([]) + [ item.key ] }}"
+    firewall_dhcp4_interfaces: "{{ firewall_dhcp4_interfaces | default([]) + [item.key] }}"
   loop: "{{ lookup('dict', firewall_interfaces) }}"
   when: "item.value.ipv4_address is defined and 'dhcp' in item.value.ipv4_address"
 
 - name: Get ipv6 dhcp interfaces
   ansible.builtin.set_fact:
-    firewall_dhcp6_interfaces: "{{ firewall_dhcp6_interfaces | default([]) + [ item.key ] }}"
+    firewall_dhcp6_interfaces: "{{ firewall_dhcp6_interfaces | default([]) + [item.key] }}"
   loop: "{{ lookup('dict', firewall_interfaces) }}"
   when: "item.value.ipv6_address is defined and 'dhcp' in item.value.ipv6_address"

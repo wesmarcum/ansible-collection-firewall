@@ -9,6 +9,7 @@
       ansible.builtin.command:
         cmd: /sbin/ifconfig
       register: ifconfig_out
+      changed_when: false
 
     - name: Check IPv4/IPv6 addresses
       ansible.builtin.assert:
@@ -21,7 +22,7 @@
           - "'fd0b:101:1::1 prefixlen 64' in ifconfig_out.stdout"
 
     - name: Verify services
-      service:
+      ansible.builtin.service:
         name: "{{ item }}"
         state: started
       become: true

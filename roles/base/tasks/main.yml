@@ -9,7 +9,8 @@
 
 # Dynamically set facts from variables.
 # This is used to get a list of dhcp enabled interfaces.
-- ansible.builtin.import_tasks: "tasks/setfacts.yml"
+- name: Import "setfacts.yml" tasks
+  ansible.builtin.import_tasks: "tasks/setfacts.yml"
   tags:
     - always
 
