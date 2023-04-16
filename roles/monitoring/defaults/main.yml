@@ -3,7 +3,8 @@
 
 firewall_monitoring_packages:
   - bmon
-  - bpytop
+  - btop
+  - gping
   - iftop
   - vnstat
 
