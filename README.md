@@ -62,9 +62,9 @@ Before starting, you should have:
 Compatibility
 -------------
 
-| OS      | Version  |
-|---------|----------|
-| FreeBSD | 13, 13.1 |
+| OS      | Version        |
+|---------|----------------|
+| FreeBSD | 13, 13.1, 13.2 |
 
 Usage
 -----
@@ -194,6 +194,8 @@ https://github.com/wesmarcum/
 Changelog
 ---------
 
+1.0.2: FreeBSD 13.2 support. Use Wireguard kernel module by default.
+1.0.1: Add support for smartd, microcode updates.
 1.0.0: Initial release.
 
 [badge-license]: https://img.shields.io/badge/license-MIT-green?
