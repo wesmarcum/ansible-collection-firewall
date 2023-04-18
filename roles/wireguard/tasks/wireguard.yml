@@ -1,4 +1,21 @@
 ---
+- name: Install wireguard packages (kmod, FreeBSD >= 13.2)
+  ansible.builtin.package:
+    name:
+      - wireguard-tools
+    state: present
+  become: true
+  when: (firewall_wireguard_use_kmod | bool) and (ansible_distribution_version is version('13.2', '>='))
+
+- name: Install wireguard packages (kmod, FreeBSD < 13.2)
+  ansible.builtin.package:
+    name:
+      - wireguard-tools
+      - wireguard-kmod
+    state: present
+  become: true
+  when: (firewall_wireguard_use_kmod | bool) and (ansible_distribution_version is version('13.2', '<'))
+
 - name: Install wireguard packages (go)
   ansible.builtin.package:
     name:
@@ -7,15 +24,6 @@
     state: present
   become: true
   when: not firewall_wireguard_use_kmod | bool
-
-- name: Install wireguard packages (kmod)
-  ansible.builtin.package:
-    name:
-      - wireguard-kmod
-      - wireguard-tools
-    state: present
-  become: true
-  when: firewall_wireguard_use_kmod | bool
 
 - name: Template wireguard configuration files
   ansible.builtin.template:
