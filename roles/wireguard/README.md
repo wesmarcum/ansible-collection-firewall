@@ -24,7 +24,7 @@ Role Variables
 |-----------------------------|----------------------------|------------------------------------------------------------------------|
 | firewall_wireguard_enable   | true                       | Enable or disable Wireguard.                                           |
 | firewall_wireguard_path     | "/usr/local/etc/wireguard" | Configuration directory.                                               |
-| firewall_wireguard_use_kmod | false                      | Use kernel module, otherwise the Go implementation will be used.       |
+| firewall_wireguard_use_kmod | true                       | Use kernel module, otherwise the Go implementation will be used.       |
 | firewall_wireguard_env      | ""                         | Environment variables to pass.  Only applies to the Go implementation. |
 | **firewall_wireguard_conf** | empty                      | List of Wireguard interfaces and parameters to configure.              |
 
