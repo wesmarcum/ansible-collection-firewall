@@ -49,6 +49,12 @@ collections:
   - name: wesmarcum.firewall
 ```
 
+This collection uses the `ipaddr` filter from `ansible.utils`. This requires the Python `netaddr` library on the Ansible controller. This can be installed via pip:
+
+```
+pip install netaddr
+```
+
 Requirements
 ------------
 
