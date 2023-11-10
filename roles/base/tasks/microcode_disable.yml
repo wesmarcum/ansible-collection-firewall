@@ -5,10 +5,10 @@
     state: stopped
   become: true
 
-# Uninstall devcpu-data
-- name: Remove devcpu-data
+# Uninstall cpu-microcode
+- name: Remove cpu-microcode
   ansible.builtin.package:
-    name: devcpu-data
+    name: cpu-microcode
     state: absent
   become: true
 

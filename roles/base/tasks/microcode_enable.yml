@@ -1,8 +1,8 @@
 ---
-# Install devcpu-data for microcode updates
-- name: Install devcpu-data for microcode updates
+# Install cpu-microcode for microcode updates
+- name: Install cpu-microcode for microcode updates
   ansible.builtin.package:
-    name: devcpu-data
+    name: cpu-microcode
     state: present
   become: true
 

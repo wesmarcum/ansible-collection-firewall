@@ -200,8 +200,9 @@ https://github.com/wesmarcum/
 Changelog
 ---------
 
-1.0.2: FreeBSD 13.2 support. Use Wireguard kernel module by default.
-1.0.1: Add support for smartd, microcode updates.
+1.0.3: Update cpu-microcode package.\
+1.0.2: FreeBSD 13.2 support. Use Wireguard kernel module by default.\
+1.0.1: Add support for smartd, microcode updates.\
 1.0.0: Initial release.
 
 [badge-license]: https://img.shields.io/badge/license-MIT-green?
