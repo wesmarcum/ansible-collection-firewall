@@ -68,9 +68,9 @@ Before starting, you should have:
 Compatibility
 -------------
 
-| OS      | Version        |
-|---------|----------------|
-| FreeBSD | 13, 13.1, 13.2 |
+| OS      | Version            |
+|---------|--------------------|
+| FreeBSD | 13, 13.1, 13.2, 14 |
 
 Usage
 -----
