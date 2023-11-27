@@ -6,6 +6,7 @@
   become: true
 
 - name: Remove vnstat
+  when: firewall_monitoring_vnstat_enable | bool is false
   block:
     - name: Stop vnstat
       ansible.builtin.service:
@@ -44,38 +45,26 @@
         state: absent
       become: true
       when: firewall_monitoring_vnstat_uselogging | int == 1
-  when: firewall_monitoring_vnstat_enable | bool is false
 
 - name: Disable email reports
+  when: firewall_monitoring_email_enable | bool is false
   block:
-    - name: Remove sendmail service configuration
-      ansible.builtin.file:
-        path: "/etc/rc.conf.d/sendmail"
-        state: absent
+    - name: Restore dma configuration
+      ansible.builtin.copy:
+        src: "etc/dma/dma.conf"
+        dest: "/etc/dma/dma.conf"
+        owner: root
+        group: wheel
+        mode: '0644'
       become: true
 
-    - name: Start sendmail service
-      ansible.builtin.service:
-        name: sendmail
-        state: started
-      become: true
-
-    - name: Uninstall ssmtp
-      ansible.builtin.package:
-        name: ssmtp
-        state: absent
-      become: true
-
-    - name: Remove ssmtp configuration
-      ansible.builtin.file:
-        path: "{{ firewall_monitoring_ssmtp_path }}/ssmtp.conf"
-        state: absent
-      become: true
-
-    - name: Remove mail aliases
-      ansible.builtin.file:
-        path: "{{ firewall_monitoring_ssmtp_path }}/revaliases"
-        state: absent
+    - name: Template mail aliases
+      ansible.builtin.template:
+        src: "etc/aliases.j2"
+        dest: "/etc/mail/aliases"
+        owner: root
+        group: wheel
+        mode: '0644'
       become: true
 
     - name: Set mailer configuration to default
@@ -92,4 +81,12 @@
         path: "/etc/periodic.conf"
         state: absent
       become: true
-  when: firewall_monitoring_email_enable | bool is false
+
+    - name: Template mail aliases
+      ansible.builtin.template:
+        src: "etc/aliases.j2"
+        dest: "/etc/mail/aliases"
+        owner: root
+        group: wheel
+        mode: '0644'
+      become: true

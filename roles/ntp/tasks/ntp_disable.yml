@@ -23,6 +23,7 @@
   ansible.builtin.command:
     cmd: "/sbin/kldunload mac_ntpd"
   when: '"mac_ntpd" in ntpdmodule.stdout'
+  changed_when: true
   become: true
 
 - name: Remove ntp log directory

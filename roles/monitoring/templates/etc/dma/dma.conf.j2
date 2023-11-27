@@ -1,0 +1,96 @@
+# managed by ansible
+# generated for {{ ansible_fqdn }}
+
+# Your smarthost (also called relayhost).  Leave blank if you don't want
+# smarthost support.
+SMARTHOST {{ firewall_monitoring_email_smarthost | default("mail") }}
+
+# Use this SMTP port.  Most users will be fine with the default (25)
+PORT {{ firewall_monitoring_email_port }}
+
+# Path to your alias file.  Just stay with the default.
+ALIASES {{ firewall_monitoring_email_aliases }}
+
+# Path to your spooldir.  Just stay with the default.
+SPOOLDIR /var/spool/dma
+
+# SMTP authentication
+{% if firewall_monitoring_email_auth_enable %}
+AUTHPATH {{ firewall_monitoring_email_authpath }}
+{% else %}
+#AUTHPATH
+{% endif %}
+
+# Uncomment if yout want TLS/SSL support
+{% if firewall_monitoring_email_securetransfer | bool %}
+SECURETRANSFER
+{% else %}
+#SECURETRANSFER
+{% endif %}
+
+# Uncomment if you want STARTTLS support (only used in combination with
+# SECURETRANSFER)
+{% if firewall_monitoring_email_starttls | bool %}
+STARTTLS
+{% else %}
+#STARTTLS
+{% endif %}
+
+# Uncomment if you have specified STARTTLS above and it should be allowed
+# to fail ("opportunistic TLS", use an encrypted connection when available
+# but allow an unencrypted one to servers that do not support it)
+{% if firewall_monitoring_email_opportunistic_tls | bool %}
+OPPORTUNISTIC_TLS
+{% else %}
+#OPPORTUNISTIC_TLS
+{% endif %}
+
+# Path to your local SSL certificate
+#CERTFILE
+
+# If you want to use plain text SMTP login without using encryption, change
+# the SECURE entry below to INSECURE.  Otherwise plain login will only work
+# over a secure connection.  Use this option with caution.
+{% if firewall_monitoring_email_secure_login | bool %}
+# SECURE
+{% else %}
+INSECURE
+{% endif %}
+
+# Uncomment if you want to defer your mails.  This is useful if you are
+# behind a dialup line.  You have to submit your mails manually with dma -q
+#DEFER
+
+# Uncomment if you want the bounce message to include the complete original
+# message, not just the headers.
+#FULLBOUNCE
+
+# The internet hostname dma uses to identify the host.
+# If not set or empty, the result of gethostname(2) is used.
+# If MAILNAME is an absolute path to a file, the first line of this file
+# will be used as the hostname.
+{% if firewall_monitoring_email_mailname | length > 0 %}
+MAILNAME {{ firewall_monitoring_email_mailname }}
+{% else %}
+#MAILNAME mail.example.net
+{% endif %}
+
+# Masquerade envelope from addresses with this address/hostname.
+# Use this if mails are not accepted by destination mail servers because
+# your sender domain is invalid.
+# By default, MASQUERADE is not set.
+# Format: MASQUERADE [user@][host]
+# Examples:
+# MASQUERADE john@  on host "hamlet" will send all mails as john@hamlet
+# MASQUERADE percolator  will send mails as $username@percolator, e.g. fish@percolator
+# MASQUERADE herb@ert  will send all mails as herb@ert
+{% if firewall_monitoring_email_masquerade | length > 0 %}
+MASQUERADE {{ firewall_monitoring_email_masquerade }}
+{% endif %}
+
+# Directly forward the mail to the SMARTHOST bypassing aliases and local delivery
+{% if firewall_monitoring_email_nullclient | bool %}
+NULLCLIENT
+{% else %}
+#NULLCLIENT
+{% endif %}

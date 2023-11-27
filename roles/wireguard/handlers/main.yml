@@ -8,4 +8,5 @@
 - name: reload wireguard
   ansible.builtin.command:
     cmd: "/usr/sbin/service wireguard reload"
+  changed_when: true
   become: true

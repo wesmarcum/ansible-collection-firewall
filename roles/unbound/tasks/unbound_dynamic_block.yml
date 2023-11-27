@@ -17,6 +17,7 @@
   ansible.builtin.command:
     cmd: "/usr/local/bin/dynamic_block.sh"
   when: not dynamic_block.stat.exists or dynamic_block.stat.size | int < 10
+  changed_when: true
   become: true
   notify: reload unbound
 

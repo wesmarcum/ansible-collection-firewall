@@ -17,6 +17,7 @@
   ansible.builtin.command:
     cmd: "/usr/local/bin/ipdb-update.sh"
   when: ipdb_result.matched | int == 0
+  changed_when: true
   become: true
 
 - name: Set cron to update ipdb
@@ -64,4 +65,5 @@
   ansible.builtin.command:
     cmd: /usr/local/bin/geoip_gen.sh
   when: ipv4_file.stat.size == 0 or ipv6_file.stat.size == 0
+  changed_when: true
   become: true

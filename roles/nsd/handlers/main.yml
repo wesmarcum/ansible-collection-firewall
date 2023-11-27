@@ -8,6 +8,7 @@
 - name: reload nsd
   ansible.builtin.command:
     cmd: "/usr/local/sbin/nsd-control reload"
+  changed_when: true
   become: true
 
 - name: restart syslogd

@@ -60,6 +60,7 @@
     cmd: "/usr/local/sbin/unbound-control-setup"
   become: true
   when: unbound_gen_keys | default(false) | bool
+  changed_when: true
   notify: restart unbound
 
 - name: Set permissions on control keys
@@ -158,6 +159,7 @@
   notify: reload unbound
 
 - name: Copy local zone files
+  when: not firewall_unbound_local_zone_template | bool
   block:
     - name: Check for local zone file
       ansible.builtin.stat:
@@ -173,7 +175,6 @@
         mode: '0640'
       become: true
       notify: reload unbound
-  when: not firewall_unbound_local_zone_template | bool
 
 - name: Template stub zones
   ansible.builtin.template:

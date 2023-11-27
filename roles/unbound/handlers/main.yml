@@ -8,6 +8,7 @@
 - name: reload unbound
   ansible.builtin.command:
     cmd: "/usr/local/sbin/unbound-control reload"
+  changed_when: true
   become: true
 
 - name: restart syslogd

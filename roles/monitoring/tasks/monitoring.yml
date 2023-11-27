@@ -13,6 +13,7 @@
   become: true
 
 - name: Configure vnstat
+  when: firewall_monitoring_vnstat_enable | bool
   block:
     - name: Create vnstat logfile
       ansible.builtin.file:
@@ -74,9 +75,9 @@
       become: true
       notify: restart newsyslog
       when: firewall_monitoring_vnstat_uselogging | int == 1
-  when: firewall_monitoring_vnstat_enable | bool
 
 - name: Configure email reports
+  when: firewall_monitoring_email_enable | bool
   block:
     - name: Disable sendmail
       ansible.builtin.blockinfile:
@@ -99,29 +100,24 @@
         state: stopped
       become: true
 
-    - name: Install ssmtp
-      ansible.builtin.package:
-        name: ssmtp
-        state: present
+    - name: Template dma configuration
+      ansible.builtin.template:
+        src: "etc/dma/dma.conf.j2"
+        dest: "{{ firewall_monitoring_dma_path }}/dma.conf"
+        owner: root
+        group: wheel
+        mode: '0644'
       become: true
 
-    - name: Template ssmtp configuration
+    - name: Template dma auth configuration
       ansible.builtin.template:
-        src: "usr/local/etc/ssmtp/ssmtp.conf.j2"
-        dest: "{{ firewall_monitoring_ssmtp_path }}/ssmtp.conf"
+        src: "etc/dma/auth.conf.j2"
+        dest: "{{ firewall_monitoring_email_authpath }}"
         owner: root
-        group: ssmtp
+        group: wheel
         mode: '0640'
       become: true
-
-    - name: Template mail aliases
-      ansible.builtin.template:
-        src: "usr/local/etc/ssmtp/revaliases.j2"
-        dest: "{{ firewall_monitoring_ssmtp_path }}/revaliases"
-        owner: root
-        group: ssmtp
-        mode: '0640'
-      become: true
+      when: firewall_monitoring_email_auth_enable | bool
 
     - name: Template mailer configuration
       ansible.builtin.template:
@@ -140,4 +136,12 @@
         group: wheel
         mode: '0640'
       become: true
-  when: firewall_monitoring_email_enable | bool
+
+    - name: Template mail aliases
+      ansible.builtin.template:
+        src: "etc/aliases.j2"
+        dest: "/etc/mail/aliases"
+        owner: root
+        group: wheel
+        mode: '0644'
+      become: true

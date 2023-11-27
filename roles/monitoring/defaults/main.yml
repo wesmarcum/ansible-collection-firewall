@@ -3,6 +3,7 @@
 
 firewall_monitoring_packages:
   - bmon
+  - bottom
   - btop
   - gping
   - iftop
@@ -14,20 +15,24 @@ firewall_monitoring_enable: true
 # Email options for periodic.
 firewall_monitoring_email_enable: false
 firewall_monitoring_email_mailto: ""
-firewall_monitoring_email_root_alias: ""
-firewall_monitoring_email_mailhub: ""
+firewall_monitoring_email_smarthost: ""
 firewall_monitoring_email_port: 25
-firewall_monitoring_email_rewritedomain: ""
-firewall_monitoring_email_hostname: ""
-firewall_monitoring_email_fromlineoverride: "NO"
-firewall_monitoring_email_usetls: "NO"
-firewall_monitoring_email_usetls_cert: "NO"
-firewall_monitoring_email_usestarttls: "NO"
-firewall_monitoring_email_username: ""
-firewall_monitoring_email_password: ""
+firewall_monitoring_email_authpath: "/etc/dma/auth.conf"
+firewall_monitoring_email_aliases: "/etc/aliases"
+firewall_monitoring_email_securetransfer: true
+firewall_monitoring_email_starttls: true
+firewall_monitoring_email_opportunistic_tls: false
+firewall_monitoring_email_secure_login: true
+firewall_monitoring_email_mailname: ""
+firewall_monitoring_email_masquerade: ""
+firewall_monitoring_email_nullclient: false
+firewall_monitoring_email_auth_enable: false
+firewall_monitoring_email_auth_username: ""
+firewall_monitoring_email_auth_password: ""
+firewall_monitoring_email_forward_root: false
 
-# Path for the ssmtp configuration.
-firewall_monitoring_ssmtp_path: "/usr/local/etc/ssmtp"
+# Path for dma configuration.
+firewall_monitoring_dma_path: "/etc/dma"
 
 # Enable vnstat interface monitoring.
 firewall_monitoring_vnstat_enable: false

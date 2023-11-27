@@ -18,6 +18,7 @@
   ansible.builtin.command:
     cmd: "/sbin/kldload mac_ntpd"
   when: '"No such file or directory" in ntpdmodule.stderr'
+  changed_when: true
   become: true
 
 - name: Create ntp log directory

@@ -8,4 +8,5 @@
 - name: reload kea
   ansible.builtin.command:
     cmd: "/usr/local/sbin/keactrl reload"
+  changed_when: true
   become: true

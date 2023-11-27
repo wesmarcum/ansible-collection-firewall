@@ -69,6 +69,7 @@
     cmd: "/usr/local/sbin/nsd-control-setup"
   become: true
   when: nsd_gen_keys | default(false) | bool
+  changed_when: true
   notify: restart nsd
 
 - name: Set permissions on control keys

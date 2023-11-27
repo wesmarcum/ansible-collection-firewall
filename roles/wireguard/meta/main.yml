@@ -5,7 +5,7 @@ galaxy_info:
   author: Wes Marcum
   description: This role installs and configures Wireguard tunnels on FreeBSD.
   license: MIT
-  min_ansible_version: 2.9
+  min_ansible_version: "2.9"
   platforms:
     - name: FreeBSD
       versions:
@@ -13,4 +13,3 @@ galaxy_info:
   galaxy_tags:
     - freebsd
     - wireguard
-  dependencies: []

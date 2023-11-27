@@ -1,7 +1,8 @@
 ---
 skip_list:
+  - experimental
   - 'yaml'
   - 'role-name'
   - 'command-instead-of-module'
-  - experimental
   - 'name[casing]'
+  - 'var-naming[no-role-prefix]'
