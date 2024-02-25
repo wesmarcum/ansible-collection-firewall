@@ -200,6 +200,7 @@ https://github.com/wesmarcum/
 Changelog
 ---------
 
+1.1.1: Add `trippy` to monitoring role.\
 1.1.0: Migrate MTA to `dma` for FreeBSD 14. **Breaking change**: read monitoring documentation and update vars.\
 1.0.3: Update cpu-microcode package.\
 1.0.2: FreeBSD 13.2 support. Use Wireguard kernel module by default.\

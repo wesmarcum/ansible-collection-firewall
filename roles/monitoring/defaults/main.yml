@@ -7,6 +7,7 @@ firewall_monitoring_packages:
   - btop
   - gping
   - iftop
+  - trippy
   - vnstat
 
 # Enable monitoring packages.
