@@ -63,6 +63,7 @@
     owner: root
     group: wheel
     mode: '0644'
+    validate: "{{ kea_dhcp4_validate_cmd }}"
   become: true
   notify: reload kea
 
@@ -73,6 +74,7 @@
     owner: root
     group: wheel
     mode: '0644'
+    validate: "{{ kea_dhcp6_validate_cmd }}"
   become: true
   notify: reload kea
 

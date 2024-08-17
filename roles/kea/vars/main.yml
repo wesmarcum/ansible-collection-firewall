@@ -1,2 +1,4 @@
 ---
-# vars file for kea
+# Commands used to validate the dhcp4/dhcp6 configurations
+kea_dhcp4_validate_cmd: "/usr/local/sbin/kea-dhcp4 -t %s"
+kea_dhcp6_validate_cmd: "/usr/local/sbin/kea-dhcp6 -t %s"
