@@ -16,7 +16,7 @@ Using the role `wesmarcum.firewall.base` is recommended.  Defining the variables
 Role Variables
 --------------
 
-#### General:
+#### General
 
 | Variable Name                 | Default Value            | Description                               |
 |-------------------------------|--------------------------|-------------------------------------------|
@@ -28,7 +28,7 @@ Role Variables
 | **firewall_kea_dhcp4_config** | empty                    | DHCPv4 server configuration.              |
 | **firewall_kea_dhcp6_config** | empty                    | DHCPv6 server configuration.              |
 
-#### Config:
+#### Config
 
 The `firewall_kea_dhcp4_config` and `firewall_kea_dhcp6_config` variables define the configuration for each server.  These variables are YAML dictionaries that are directly converted to JSON for the Kea configuration files.  An example is included below.  Please see the Kea [documentation](https://kea.readthedocs.io/en/latest/) for all options.
 
@@ -90,6 +90,7 @@ firewall_kea_dhcp4_config:
     # Change these subnets to match your configuration.
     subnet4:
       - subnet: 192.168.0.0/24
+        id: 1000
         interface: em1
         pools:
           - pool: 192.168.0.100 - 192.168.0.200
@@ -105,6 +106,7 @@ firewall_kea_dhcp4_config:
             ip-address: 192.168.0.10
             hostname: myhost
       - subnet: 10.0.0.0/24
+        id: 1001
         interface: em2
         pools:
           - pool: 10.0.0.100 - 10.0.0.200
@@ -160,6 +162,7 @@ firewall_kea_dhcp6_config:
     # Change these subnets to match your configuration.
     subnet6:
       - subnet: 'fd00:2001:0001::/64'
+        id: 2000
         interface: em1
         pools:
           - pool: 'fd00:2001:0001::1000 - fd00:2001:0001::2000'
@@ -194,4 +197,4 @@ MIT
 Author Information
 ------------------
 
-https://github.com/wesmarcum/
+<https://github.com/wesmarcum/>

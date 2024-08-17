@@ -1,5 +1,6 @@
 Ansible Collection - Firewall
 =============================
+
 [![Galaxy Collection][badge-galaxy]][link-galaxy]
 [![MIT licensed][badge-license]][link-license]
 [![CI][badge-gh-actions]][link-gh-actions]
@@ -7,6 +8,7 @@ Ansible Collection - Firewall
 This collection of roles builds a dedicated open source firewall based on [FreeBSD](https://www.freebsd.org/).  Functionality similar to open source projects PFSense and OPNSense is provided, while maintaining a minimal management layer.
 
 Advantages:
+
 * Build a simple configuration on vanilla FreeBSD.
 * Leverage ZFS on FreeBSD with [boot environments](https://wiki.freebsd.org/BootEnvironments).
 * No web interface for management, only OpenSSH.
@@ -14,6 +16,7 @@ Advantages:
 * Run your configuration on the latest version of FreeBSD and 3rd party packages.
 
 Roles included in this collection:
+
 * [base](./roles/base)
 * [inadyn](./roles/inadyn)
 * [kea](./roles/kea)
@@ -26,6 +29,7 @@ Roles included in this collection:
 * [wireguard](./roles/wireguard)
 
 The `base` role is responsible for setting up network interfaces, routing, and the PF firewall.  At a minimum, you should use the following roles in your playbook:
+
 * `wesmarcum.firewall.base`
 * `wesmarcum.firewall.unbound` (Recursive DNS resolver)
 * `wesmarcum.firewall.kea` (DHCPv4/DHCPv6 server)
@@ -61,6 +65,7 @@ Requirements
 It is recommended to use this collection on a dedicated hardware appliance or VM running FreeBSD.  The `base` role modifies `/etc/rc.conf` when needed, but keeps most of the service configuration in separate files located in `/etc/rc.conf.d`.
 
 Before starting, you should have:
+
 * A supported version of FreeBSD.  A fresh install is recommended.
 * Python 3.
 * Sudo or another method to become root.
@@ -92,6 +97,7 @@ A simple configuration is provided below.  In order to keep the main playbook mi
 ```
 
 In the file `vars/firewall_simple.yml`, you can then define all variables for the role:
+
 ```yaml
 ---
 firewall_interfaces:
@@ -156,6 +162,7 @@ firewall_kea_dhcp4_config:
     # Pools
     subnet4:
       - subnet: 10.0.0.0/24
+        id: 1000
         interface: em1
         pools:
           - pool: 10.0.0.100 - 10.0.0.200
@@ -195,11 +202,12 @@ MIT
 Author Information
 ------------------
 
-https://github.com/wesmarcum/
+<https://github.com/wesmarcum/>
 
 Changelog
 ---------
 
+1.1.2: Add subnet IDs for Kea 2.6.\
 1.1.1: Add `trippy` to monitoring role.\
 1.1.0: Migrate MTA to `dma` for FreeBSD 14. **Breaking change**: read monitoring documentation and update vars.\
 1.0.3: Update cpu-microcode package.\
