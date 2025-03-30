@@ -142,3 +142,6 @@ firewall_unbound_dynamic_block: false
 # Dynamic block source url.  This can be any url in 'hostfile' format.
 # Recommend Steven Black's lists: https://github.com/StevenBlack/hosts.
 firewall_unbound_dynamic_block_url: "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
+
+# Enable or disable allow list for dynamic blocking.
+firewall_unbound_dynamic_block_allowlist: false

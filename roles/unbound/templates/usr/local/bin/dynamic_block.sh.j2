@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # managed by ansible
 # generated for {{ ansible_fqdn }}
 
@@ -6,18 +6,36 @@ url={{ firewall_unbound_dynamic_block_url }}
 include_ipv6=true
 unbound_path="/usr/local/etc/unbound"
 outfile="dynamic_block.conf"
+allowlist_enable={{ firewall_unbound_dynamic_block_allowlist | bool | lower }}
+allowlist_file="${unbound_path}/dynamic_block_allow.conf"
+declare -a allow_domains
 
-echo "server:" >> /tmp/dynblock-unbound
-curl -s $url | grep '^0\.0\.0\.0' | awk '{print "\tlocal-zone: \""$2"\" redirect\n\tlocal-data: \""$2" A 0.0.0.0\"\n"}' >> /tmp/dynblock-unbound
-
-if [ "$include_ipv6" = "true" ]; then
-  curl -s $url | grep '^0\.0\.0\.0' | awk '{print "\tlocal-data: \""$2" AAAA ::\"\n"}' >> /tmp/dynblock-unbound
+# Read in allowed domains.
+if [[ -f "${allowlist_file}" ]]; then
+    IFS=$'\n' read -d '' -r -a allow_domains <"${allowlist_file}"
 fi
 
+# Fetch the block list and save to a temp file in the unbound format.
+echo "server:" >>/tmp/dynblock-unbound
+curl -s $url | grep '^0\.0\.0\.0' | awk '{print "\tlocal-zone: \""$2"\" redirect\n\tlocal-data: \""$2" A 0.0.0.0\"\n"}' >>/tmp/dynblock-unbound
+
+if [ "$include_ipv6" = "true" ]; then
+    curl -s $url | grep '^0\.0\.0\.0' | awk '{print "\tlocal-data: \""$2" AAAA ::\"\n"}' >>/tmp/dynblock-unbound
+fi
+
+# Search the temp file for allowed domains. Remove if found.
+if [[ "${allowlist_enable}" = "true" ]]; then
+    for domain in "${allow_domains[@]}"; do
+        sed -E -i '' "/\"${domain}\"/d" /tmp/dynblock-unbound
+        sed -E -i '' "/\"${domain} A/d" /tmp/dynblock-unbound
+    done
+fi
+
+# Copy the temp file to the final destination.
 cp /tmp/dynblock-unbound "${unbound_path}/${outfile}"
 rm /tmp/dynblock-unbound
 chown unbound:wheel "${unbound_path}/${outfile}"
 chmod 0640 "${unbound_path}/${outfile}"
 
-# reload unbound conf
-/usr/local/sbin/unbound-control reload 2>&1 > /dev/null
+# Reload unbound conf.
+/usr/local/sbin/unbound-control reload 2>&1 >/dev/null

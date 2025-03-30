@@ -11,6 +11,12 @@
   changed_when: true
   become: true
 
+- name: run dynamic block script
+  ansible.builtin.command:
+    cmd: "/usr/local/bin/dynamic_block.sh"
+  changed_when: true
+  become: true
+
 - name: restart syslogd
   ansible.builtin.service:
     name: syslogd
