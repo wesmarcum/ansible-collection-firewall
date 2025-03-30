@@ -13,6 +13,7 @@ firewall_microcode_updates_enable: false
 ### Packages
 
 firewall_common_packages:
+  - bash
   - bind-tools
   - smartmontools
   - curl

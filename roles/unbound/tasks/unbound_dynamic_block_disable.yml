@@ -11,6 +11,12 @@
     state: absent
   become: true
 
+- name: Remove dynamic block allow list
+  ansible.builtin.file:
+    path: "{{ firewall_unbound_path }}/dynamic_block_allow.conf"
+    state: absent
+  become: true
+
 - name: Remove cron job to update dynamic block list
   ansible.builtin.cron:
     name: "Update dynamic block list"

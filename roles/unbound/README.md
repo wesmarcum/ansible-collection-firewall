@@ -20,7 +20,7 @@ Unbound has **many** configuration options.  Most of the options listed below ar
 Role Variables
 --------------
 
-#### General:
+#### General
 
 | Variable Name                        | Default Value          | Description                                                                                    |
 |--------------------------------------|------------------------|------------------------------------------------------------------------------------------------|
@@ -43,8 +43,9 @@ Role Variables
 | firewall_unbound_forward_zones       | quad9                  | List of forward zones and resolvers.  See examples below.                                      |
 | firewall_unbound_dynamic_block       | false                  | Enable or disable dynamic blocking for ads/malware.                                            |
 | firewall_unbound_dynamic_block_url   | StevenBlack Hosts      | URL to pull host block list.  Updated nightly by default.                                      |
+| firewall_unbound_dynamic_block_allowlist | false | Enable or disable the allow list for dynamic blocking. |
 
-#### Network:
+#### Network
 
 | Variable Name                       | Default Value                                  | Description                                 |
 |-------------------------------------|------------------------------------------------|---------------------------------------------|
@@ -62,7 +63,7 @@ Role Variables
 | firewall_unbound_tls_dot_interfaces | empty                                          | List of interfaces to enable for DoT.       |
 | firewall_unbound_tls_dot_port       | 853                                            | Default port to listen on for DoT requests. |
 
-#### Logging:
+#### Logging
 
 | Variable Name                           | Default Value | Description                                                     |
 |-----------------------------------------|---------------|-----------------------------------------------------------------|
@@ -75,7 +76,7 @@ Role Variables
 | firewall_unbound_log_replies            | no            | Do not print one line per reply to the log.                     |
 | firewall_unbound_log_servfail           | no            | Do not log lines that say why queries return SERVFAIL.          |
 
-#### Privacy:
+#### Privacy
 
 | Variable Name                    | Default Value | Description                                                                                                         |
 |----------------------------------|---------------|---------------------------------------------------------------------------------------------------------------------|
@@ -85,7 +86,7 @@ Role Variables
 | firewall_unbound_neg_cache_size  | 4M            | Bytes of the size for the negative cache.                                                                           |
 | firewall_unbound_qname_min       | yes           | Send minimum amount of information to upstream servers.                                                             |
 
-#### Security:
+#### Security
 
 | Variable Name                             | Default Value                                  | Description                                                                                     |
 |-------------------------------------------|------------------------------------------------|-------------------------------------------------------------------------------------------------|
@@ -105,7 +106,7 @@ Role Variables
 | firewall_unbound_use_caps_for_id          | yes                                            | Use random bits in the query to foil spoof attempts.  Experimental.                             |
 | firewall_unbound_val_clean_additional     | yes                                            | Remove data from the additional section that are not signed properly.                           |
 
-#### Performance:
+#### Performance
 
 | Variable Name                           | Default Value | Description                                                                     |
 |-----------------------------------------|---------------|---------------------------------------------------------------------------------|
@@ -129,7 +130,7 @@ Role Variables
 | firewall_unbound_infra_cache_numhosts   | 10000         | Number of hosts for which information is cached.                                |
 | firewall_unbound_outgoing_num_tcp       | 10            | Number of outgoing TCP buffers to allocate per thread.                          |
 
-#### Statistics:
+#### Statistics
 
 | Variable Name                          | Default Value | Description                                                        |
 |----------------------------------------|---------------|--------------------------------------------------------------------|
@@ -137,7 +138,7 @@ Role Variables
 | firewall_unbound_extended_statistics   | yes           | Print extended stats from `unbound-control`.                       |
 | firewall_unbound_statistics_cumulative | yes           | If enable, stats are cumulative since starting unbound.            |
 
-#### Local zones:
+#### Local zones
 
 Local zones can be defined using the `firewall_unbound_local_zones` and `firewall_unbound_local_zones_rev` variables.  Local zones set the Unbound zone type - see [unbound.conf](https://unbound.docs.nlnetlabs.nl/en/latest/manpages/unbound.conf.html) for details on zone types.  DNSSEC is also disabled for local zones.  Parameters for these variables can be found in the table below.
 
@@ -148,7 +149,7 @@ Local zones can be defined using the `firewall_unbound_local_zones` and `firewal
 
 Local zones will be generated automatically by default using the template `templates/usr/local/etc/unbound/local_zone.conf.j2` and the two local zone variables listed above.  If you wish to change this behavior, you can set `firewall_unbound_local_zone_template` to false.  In this scenario, you must provide your own custom local zone file at the location `files/usr/local/etc/unbound/local_zone.conf`.
 
-#### Stub zones:
+#### Stub zones
 
 Zones that should be forwarded to a specific resolver, such as NSD, can be defined with `firewall_unbound_stub_zones`:
 
@@ -159,7 +160,7 @@ Zones that should be forwarded to a specific resolver, such as NSD, can be defin
 | ip          | 10.1.1.1   | IP of the DNS server.                                                                                                                    |
 | port        | 53         | Port to send requests for the DNS server.                                                                                                |
 
-#### Forward zones:
+#### Forward zones
 
 If `firewall_unbound_forward_enable` is `true`, you can define `firewall_unbound_forward_zones` to specify upstream zones and forwarder configuration:
 
@@ -175,25 +176,28 @@ If `firewall_unbound_forward_enable` is `true`, you can define `firewall_unbound
 
 Note that if `firewall_unbound_forward_enable` is `false`, Unbound will query the root servers.
 
-#### Dynamic blocking:
+#### Dynamic blocking
 
-The `unbound` role can automatically set up dynamic blocking if `firewall_unbound_dynamic_block` is set to `true`.  By default, Steven Black's [hosts list](https://github.com/StevenBlack/hosts) is used.  If you'd like to change the list used, set `firewall_unbound_dynamic_block_url` to a URL containing a raw list of hosts - e.g. "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts".  You can use any URL that provides host format.  Lists will be automatically updated each night via Cron.  A provided shell script translates the list from "hosts" format to Unbound's format for local data.
+The `unbound` role can automatically set up dynamic blocking if `firewall_unbound_dynamic_block` is set to `true`.  By default, Steven Black's [hosts list](https://github.com/StevenBlack/hosts) is used.  If you'd like to change the list used, set `firewall_unbound_dynamic_block_url` to a URL containing a raw list of hosts - e.g. "<https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts>".  You can use any URL that provides host format.  Lists will be automatically updated each night via Cron.  A provided shell script translates the list from "hosts" format to Unbound's format for local data.
 
-#### Static blocking:
+An allow list for dynamic blocking can be enabled by setting `firewall_unbound_dynamic_block_allowlist` to `true`. The Unbound role will read a list of allowed domains from the local file `files/usr/local/etc/unbound/dynamic_block_allow.conf`. The list of allowed domains should be plain text with one line per domain.
+
+#### Static blocking
 
 If you wish to always block certain domains, these can be entered into a static block list.  The Unbound role looks for the file `files/usr/local/etc/unbound/static_block.conf` to copy to the target system.  The static block file will automatically be copied if it exists.  This file should be in Unbound's local-zone/local-data format:
+
 ```
 server:
-	local-zone: "example.com" redirect
-	local-data: "example.com A 0.0.0.0"
-        local-data: "example.com AAAA ::"
+ local-zone: "example.com" redirect
+ local-data: "example.com A 0.0.0.0"
+ local-data: "example.com AAAA ::"
 
-        local-zone: "anotherdomain.com" redirect
-	local-data: "anotherdomain.com A 0.0.0.0"
-        local-data: "anotherdomain.com AAAA ::"
+ local-zone: "anotherdomain.com" redirect
+ local-data: "anotherdomain.com A 0.0.0.0"
+ local-data: "anotherdomain.com AAAA ::"
 ```
 
-#### DNS over HTTPS / DNS over TLS:
+#### DNS over HTTPS / DNS over TLS
 
 DoH / DoT can be enabled with `firewall_unbound_tls_enable`.  You **must** have a valid certificate and private key defined by the `firewall_unbound_tls_service_pem` and `firewall_unbound_tls_service_key` path variables.  This role does not automatically generate certificates.  The [community.crypto](https://docs.ansible.com/ansible/latest/collections/community/crypto/index.html#plugins-in-community-crypto) Ansible modules can do this for you in separate tasks.  You must also specify a list of interfaces to enable for DoT / DoH:
 
@@ -294,4 +298,4 @@ MIT
 Author Information
 ------------------
 
-https://github.com/wesmarcum
+<https://github.com/wesmarcum>

@@ -13,6 +13,33 @@
     path: "{{ firewall_unbound_path }}/dynamic_block.conf"
   register: dynamic_block
 
+- name: Check for local allow list
+  ansible.builtin.stat:
+    path: "files/usr/local/etc/unbound/dynamic_block_allow.conf"
+  delegate_to: localhost
+  register: dynamic_block_local_allow
+
+- name: Copy dynamic block allow list (if exists)
+  ansible.builtin.copy:
+    src: "files/usr/local/etc/unbound/dynamic_block_allow.conf"
+    dest: "{{ firewall_unbound_path }}/dynamic_block_allow.conf"
+    owner: unbound
+    group: wheel
+    mode: '0640'
+  become: true
+  when: dynamic_block_local_allow.stat.exists and firewall_unbound_dynamic_block_allowlist | bool
+  notify:
+    - run dynamic block script
+
+- name: Remove dynamic block allow list (if disabled)
+  ansible.builtin.file:
+    path: "{{ firewall_unbound_path }}/dynamic_block_allow.conf"
+    state: absent
+  become: true
+  when: firewall_unbound_dynamic_block_allowlist | bool is false
+  notify:
+    - run dynamic block script
+
 - name: Run dynamic block script
   ansible.builtin.command:
     cmd: "/usr/local/bin/dynamic_block.sh"
