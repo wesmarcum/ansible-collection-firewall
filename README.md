@@ -207,6 +207,7 @@ Author Information
 Changelog
 ---------
 
+1.1.5: Update paths for kea v2.6.3.\
 1.1.4: Add allow list for Unbound.\
 1.1.3: Add validation for Kea configuration.\
 1.1.2: Add subnet IDs for Kea 2.6.\
