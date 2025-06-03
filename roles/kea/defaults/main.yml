@@ -12,7 +12,8 @@ firewall_kea_ddns_enable: false
 firewall_kea_ctrl_agent_enable: false
 
 firewall_kea_path: "/usr/local/etc/kea"
-firewall_kea_lease_path: "/usr/local/var/lib/kea"
+firewall_kea_lease_path: "/var/db/kea"
+firewall_kea_log_path: "/var/log/kea"
 
 # DHCPv4 configuration for Kea.  See README for an example configuration.
 firewall_kea_dhcp4_config: {}

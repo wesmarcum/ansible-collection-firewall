@@ -24,7 +24,8 @@ Role Variables
 | firewall_kea_dhcp4_enable     | true                     | Enable the DHCPv4 server.                 |
 | firewall_kea_dhcp6_enable     | true                     | Enable the DHCPv6 server.                 |
 | firewall_kea_path             | "/usr/local/etc/kea"     | Location for the kea configuration files. |
-| firewall_kea_lease_path       | "/usr/local/var/lib/kea" | Location for the DHCP lease files.        |
+| firewall_kea_lease_path       | "/var/db/kea" | Location for the DHCP lease files.        |
+| firewall_kea_log_path       | "/var/log/kea" | Location for kea log files.        |
 | **firewall_kea_dhcp4_config** | empty                    | DHCPv4 server configuration.              |
 | **firewall_kea_dhcp6_config** | empty                    | DHCPv6 server configuration.              |
 
@@ -73,7 +74,7 @@ firewall_kea_dhcp4_config:
       type: memfile
       persist: true
       lfc-interval: 3600
-      name: /usr/local/var/lib/kea/dhcp4.leases
+      name: /var/db/kea/dhcp4.leases
     expired-leases-processing:
       reclaim-timer-wait-time: 10
       flush-reclaimed-timer-wait-time: 25
@@ -120,7 +121,7 @@ firewall_kea_dhcp4_config:
     loggers:
       - name: kea-dhcp4
         output_options:
-          - output: /var/log/kea-dhcp4.log
+          - output: /var/log/kea/kea-dhcp4.log
             pattern: |
               {% raw %}%d{%j %H:%M:%S.%q} %c %m{% endraw %}
             flush: true
@@ -146,7 +147,7 @@ firewall_kea_dhcp6_config:
       type: memfile
       persist: true
       lfc-interval: 3600
-      name: /usr/local/var/lib/kea/dhcp6.leases
+      name: /var/db/kea/dhcp6.leases
     expired-leases-processing:
       reclaim-timer-wait-time: 10
       flush-reclaimed-timer-wait-time: 25
@@ -179,7 +180,7 @@ firewall_kea_dhcp6_config:
     loggers:
       - name: kea-dhcp6
         output_options:
-          - output: /var/log/kea-dhcp6.log
+          - output: /var/log/kea/kea-dhcp6.log
             pattern: |
               {% raw %}%d{%j %H:%M:%S.%q} %c %m{% endraw %}
             flush: true

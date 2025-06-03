@@ -5,6 +5,15 @@
     state: present
   become: true
 
+- name: Create log file directory
+  ansible.builtin.file:
+    path: "{{ firewall_kea_log_path }}"
+    state: directory
+    owner: root
+    group: wheel
+    mode: '0750'
+  become: true
+
 - name: Create lease directory
   ansible.builtin.file:
     path: "{{ firewall_kea_lease_path }}"

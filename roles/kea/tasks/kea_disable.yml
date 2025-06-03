@@ -29,6 +29,12 @@
     state: absent
   become: true
 
+- name: Remove log file directory
+  ansible.builtin.file:
+    path: "{{ firewall_kea_log_path }}"
+    state: absent
+  become: true
+
 - name: Remove keactrl.conf
   ansible.builtin.file:
     path: "{{ firewall_kea_path }}/keactrl.conf"
