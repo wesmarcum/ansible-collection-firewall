@@ -94,12 +94,16 @@ server:
     # DoT Interfaces
     {%      for int in firewall_nsd_tls_interfaces %}
     {# check for valid ipv4 address #}
-    {%          if firewall_interfaces[int].ipv4_address | default(omit) | ansible.utils.ipaddr %}
+    {%          if firewall_interfaces[int].ipv4_address is defined %}
+    {%              if firewall_interfaces[int].ipv4_address | ansible.utils.ipv4 %}
     interface: {{ firewall_interfaces[int].ipv4_address | ansible.utils.ipaddr('address') }}@{{ firewall_nsd_tls_port }}
+    {%              endif %}
     {%          endif %}
     {# check for valid ipv6 address #}
-    {%          if firewall_interfaces[int].ipv6_address | default(omit) | ansible.utils.ipaddr %}
+    {%          if firewall_interfaces[int].ipv6_address is defined %}
+    {%              if firewall_interfaces[int].ipv6_address | ansible.utils.ipv6 %}
     interface: {{ firewall_interfaces[int].ipv6_address | ansible.utils.ipaddr('address') }}@{{ firewall_nsd_tls_port }}
+    {%              endif %}
     {%          endif %}
     {%      endfor %}
     {%  endif %}
