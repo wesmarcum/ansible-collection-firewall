@@ -65,12 +65,16 @@ server:
     {%  if not data.external | default(false) | bool %}
     # {{ data.name | default(int) }}
     {# check for valid ipv4 address #}
-    {%      if data.ipv4_address | default(omit) | ansible.utils.ipaddr %}
+    {%      if data.ipv4_address is defined %}
+    {%          if data.ipv4_address | ansible.utils.ipv4 %}
     interface: {{ data.ipv4_address | ansible.utils.ipaddr('address') }}
+    {%          endif %}
     {%      endif %}
     {# check for valid ipv6 address #}
-    {%      if data.ipv6_address | default(omit) | ansible.utils.ipaddr %}
+    {%      if data.ipv6_address is defined %}
+    {%          if data.ipv6_address | ansible.utils.ipv6 %}
     interface: {{ data.ipv6_address | ansible.utils.ipaddr('address') }}
+    {%          endif %}
     {%      endif %}
     {%  endif %}
     {% endfor %}
@@ -91,12 +95,16 @@ server:
     # DoH Interfaces
     {%      for int in firewall_unbound_tls_doh_interfaces %}
     {# check for valid ipv4 address #}
-    {%          if firewall_interfaces[int].ipv4_address | default(omit) | ansible.utils.ipaddr %}
+    {%          if firewall_interfaces[int].ipv4_address is defined %}
+    {%              if firewall_interfaces[int].ipv4_address | ansible.utils.ipv4 %}
     interface: {{ firewall_interfaces[int].ipv4_address | ansible.utils.ipaddr('address') }}@{{ firewall_unbound_tls_doh_port }}
+    {%              endif %}
     {%          endif %}
     {# check for valid ipv6 address #}
-    {%          if firewall_interfaces[int].ipv6_address | default(omit) | ansible.utils.ipaddr %}
+    {%          if firewall_interfaces[int].ipv6_address is defined %}
+    {%              if firewall_interfaces[int].ipv6_address | ansible.utils.ipv6 %}
     interface: {{ firewall_interfaces[int].ipv6_address | ansible.utils.ipaddr('address') }}@{{ firewall_unbound_tls_doh_port }}
+    {%              endif %}
     {%          endif %}
     {%      endfor %}
     {%  endif %}
@@ -106,12 +114,16 @@ server:
     # DoT Interfaces
     {%      for int in firewall_unbound_tls_dot_interfaces %}
     {# check for valid ipv4 address #}
-    {%          if firewall_interfaces[int].ipv4_address | default(omit) | ansible.utils.ipaddr %}
+    {%          if firewall_interfaces[int].ipv4_address is defined %}
+    {%              if firewall_interfaces[int].ipv4_address | ansible.utils.ipv4 %}
     interface: {{ firewall_interfaces[int].ipv4_address | ansible.utils.ipaddr('address') }}@{{ firewall_unbound_tls_dot_port }}
+    {%              endif %}
     {%          endif %}
     {# check for valid ipv6 address #}
-    {%          if firewall_interfaces[int].ipv6_address | default(omit) | ansible.utils.ipaddr %}
+    {%          if firewall_interfaces[int].ipv6_address is defined %}
+    {%              if firewall_interfaces[int].ipv6_address | ansible.utils.ipv6 %}
     interface: {{ firewall_interfaces[int].ipv6_address | ansible.utils.ipaddr('address') }}@{{ firewall_unbound_tls_dot_port }}
+    {%              endif %}
     {%          endif %}
     {%      endfor %}
     {%  endif %}
