@@ -20,8 +20,8 @@
 - name: Remove cron job to update dynamic block list
   ansible.builtin.cron:
     name: "Update dynamic block list"
-    minute: "{{ 59 | random(seed=ansible_hostname) }}"
-    hour: "{{ range(20, 23, 1) | random(seed=ansible_hostname) }}"
+    minute: "{{ 59 | random(seed=ansible_facts.hostname) }}"
+    hour: "{{ range(20, 23, 1) | random(seed=ansible_facts.hostname) }}"
     user: unbound
     job: "/usr/local/bin/dynamic_block.sh"
     state: absent

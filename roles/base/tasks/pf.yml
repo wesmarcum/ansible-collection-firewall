@@ -90,7 +90,7 @@
     validate: "pfctl -nf %s"
   become: true
   with_first_found:
-    - "templates/etc/pf/pf.conf_{{ ansible_hostname }}.j2"
+    - "templates/etc/pf/pf.conf_{{ ansible_facts.hostname }}.j2"
     - "templates/etc/pf/pf.conf_default.j2"
   notify:
     - restart pf

@@ -1,5 +1,5 @@
 # managed by ansible
-# generated for {{ ansible_fqdn }}
+# generated for {{ ansible_facts['fqdn'] }}
 
 {% for int in firewall_interfaces %}
 {%  if (not firewall_interfaces[int].external | default(false) | bool) and (firewall_interfaces[int].ipv6_address is defined) %}

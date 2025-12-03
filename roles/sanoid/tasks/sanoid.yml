@@ -49,7 +49,7 @@
     mode: '0644'
   become: true
   with_first_found:
-    - "usr/local/etc/sanoid/sanoid_{{ ansible_hostname }}.conf.j2"
+    - "usr/local/etc/sanoid/sanoid_{{ ansible_facts.hostname }}.conf.j2"
     - "usr/local/etc/sanoid/sanoid_default.conf.j2"
 
 - name: Set cron job for sanoid
@@ -61,5 +61,5 @@
     mode: '0640'
     block: |
       */15 * * * * root flock -n /var/run/sanoid/cron-take.lock -c "sanoid --take-snapshots"
-      {{ 59 | random(start=1, seed=ansible_hostname) }} {{ 4 | random(seed=ansible_hostname) }} * * * root flock -n /var/run/sanoid/cron-prune.lock -c "sanoid --prune-snapshots"
+      {{ 59 | random(start=1, seed=ansible_facts.hostname) }} {{ 4 | random(seed=ansible_facts.hostname) }} * * * root flock -n /var/run/sanoid/cron-prune.lock -c "sanoid --prune-snapshots"
   become: true

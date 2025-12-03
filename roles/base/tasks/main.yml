@@ -100,8 +100,8 @@
 - name: Set cron to run freebsd-update
   ansible.builtin.cron:
     name: "freebsd-update"
-    minute: "{{ 59 | random(seed=ansible_hostname) }}"
-    hour: "{{ 5 | random(seed=ansible_hostname) }}"
+    minute: "{{ 59 | random(seed=ansible_facts.hostname) }}"
+    hour: "{{ 5 | random(seed=ansible_facts.hostname) }}"
     job: "/usr/sbin/freebsd-update cron"
     user: root
   become: true
