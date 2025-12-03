@@ -207,6 +207,7 @@ Author Information
 Changelog
 ---------
 
+1.1.7: Update all tasks/templates to use ansible_facts dictionary.\
 1.1.6: Update ip checks for nsd/unbound templates.\
 1.1.5: Update paths for kea v2.6.3.\
 1.1.4: Add allow list for Unbound.\
