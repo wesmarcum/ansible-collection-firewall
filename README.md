@@ -75,7 +75,7 @@ Compatibility
 
 | OS      | Version            |
 |---------|--------------------|
-| FreeBSD | 13, 14             |
+| FreeBSD | 14, 15             |
 
 Usage
 -----
