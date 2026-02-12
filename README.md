@@ -207,6 +207,7 @@ Author Information
 Changelog
 ---------
 
+1.1.8: Add tls_crypt, tls_auth variables for openvpn_client.\
 1.1.7: Update all tasks/templates to use ansible_facts dictionary.\
 1.1.6: Update ip checks for nsd/unbound templates.\
 1.1.5: Update paths for kea v2.6.3.\
