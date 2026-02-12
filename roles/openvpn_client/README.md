@@ -46,7 +46,9 @@ The `firewall_openvpn_client_conf` variable is a list of OpenVPN client configur
 | **username**          | "{{ vault_openvpn_my_provider_username }}"         | Username for the VPN provider.                                                               |
 | **password**          | "{{ vault_openvpn_my_provider_password }}"         | Password for the VPN provider.                                                               |
 | ca_cert               | "files/usr/local/etc/openvpn/my_provider/ca.crt"   | Path to the CA certificate for the VPN provider.                                             |
-| tls_key               | "files/usr/local/etc/openvpn/my_provider/tls-auth" | Path to the TLS key for the VPN provider.                                                    |
+| tls_key               | "files/usr/local/etc/openvpn/my_provider/tls.key" | Path to the TLS key for the VPN provider.                                                    |
+| tls_crypt             | true                               | Enable tls-crypt |
+| tls_auth              | true                               | Enable tls-auth  |
 | **remotes**           | see examples below                                 | A list of remotes.  Keys should contain `host` (required), `port`, and `protocol`.           |
 | remote_random         | false                                              | Randomize server on startup.  Otherwise the list will be processed top down.                 |
 | protocol              | udp                                                | Default protocol for the client.                                                             |
@@ -83,6 +85,7 @@ Define all variables in the `vars/firewall.yml` file.  Example with all options 
 ```yaml
 firewall_openvpn_client_conf:
   - name: my_provider
+    tls_crypt: true
     tls_key: "files/usr/local/etc/openvpn/my_provider/tls-auth"
     ca_cert: "files/usr/local/etc/openvpn/my_provider/ca.crt"
     username: "{{ vault_openvpn_my_provider_username }}"
@@ -111,6 +114,7 @@ Minimal configuration:
 ```yaml
 firewall_openvpn_client_conf:
   - name: my_provider
+    tls_crypt: true
     tls_key: "files/usr/local/etc/openvpn/my_provider/tls-auth"
     ca_cert: "files/usr/local/etc/openvpn/my_provider/ca.crt"
     username: "{{ vault_openvpn_my_provider_username }}"

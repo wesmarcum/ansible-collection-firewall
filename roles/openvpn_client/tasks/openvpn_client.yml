@@ -48,7 +48,7 @@
 - name: Copy openvpn client tls keys
   ansible.builtin.copy:
     src: "{{ item.tls_key }}"
-    dest: "{{ firewall_openvpn_client_path }}/{{ item.name }}/tls-auth"
+    dest: "{{ firewall_openvpn_client_path }}/{{ item.name }}/tls.key"
     owner: openvpn
     group: wheel
     mode: '0600'

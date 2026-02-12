@@ -30,9 +30,15 @@ auth-user-pass /usr/local/etc/openvpn/{{ item.name }}/up
 # Don't cache credentials in memory
 auth-nocache
 
-# tls auth key for the server
-tls-auth /usr/local/etc/openvpn/{{ item.name }}/tls-auth 1
+{% if item.tls_crypt | default(false) | bool %}
+# tls key for the server
+tls-crypt /usr/local/etc/openvpn/{{ item.name }}/tls.key
 
+{% elif item.tls_auth | default(false) | bool %}
+# tls key for the server
+tls-auth /usr/local/etc/openvpn/{{ item.name }}/tls.key 1
+
+{% endif %}
 # Directory for trusted server certs
 # capath /usr/local/etc/openvpn/{{ item.name }}/ca
 
